@@ -1,0 +1,1831 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2a1b14">
+<title>Le Six Café Manager</title>
+<style>
+:root {
+  --espresso: #2a1b14; --espresso-2: #3a271d; --cream: #f7f1e6; --paper: #fffdf9; --line: #e9dfcf;
+  --brass: #b5832f; --brass-d: #96691f; --terra: #b4532a; --olive: #55693a; --ink: #2b2118; --muted: #8a7a68;
+  --danger: #b3261e; --warn-bg: #fdf0d9; --ok-bg: #e8f0dc; --bad-bg: #fbe4df;
+  --radius: 14px; --shadow: 0 1px 2px rgba(42,27,20,.06), 0 6px 20px rgba(42,27,20,.06);
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --sidebar: 262px;
+}
+html[lang="ar"] { --font-body: 'Cairo', 'Segoe UI', Tahoma, sans-serif; --font-display: 'Cairo', 'Segoe UI', sans-serif; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { font-family: var(--font-body); background: var(--cream); color: var(--ink); font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; font-weight: 600; letter-spacing: -.01em; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- Login ---------- */
+.login { min-height: 100%; display: grid; grid-template-columns: 1.1fr 1fr; }
+.login-art { background: radial-gradient(1200px 600px at 20% 10%, #4a3023 0%, var(--espresso) 60%); color: #f3e7d3; padding: 56px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+.login-art::after { content: ""; position: absolute; inset-inline-end: -120px; bottom: -120px; width: 420px; height: 420px; border: 1px solid rgba(181,131,47,.35); border-radius: 50%; box-shadow: 0 0 0 60px rgba(181,131,47,.06), 0 0 0 120px rgba(181,131,47,.04); }
+.logo-mark { display: flex; align-items: center; gap: 14px; }
+.logo-six { width: 52px; height: 52px; border-radius: 14px; background: var(--brass); color: var(--espresso); display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 30px; flex: none; overflow: hidden; }
+.logo-six img { width: 100%; height: 100%; object-fit: cover; }
+.login-art h1 { font-size: clamp(34px, 4vw, 54px); line-height: 1.05; max-width: 14ch; }
+.login-art p { color: #cdbca3; max-width: 38ch; }
+.login-form-wrap { display: grid; place-items: center; padding: 32px 20px; background: var(--paper); }
+.login-card { width: 100%; max-width: 380px; }
+.login-card h2 { font-size: 30px; margin-bottom: 4px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; }
+.field > label, .lbl { font-size: 13px; font-weight: 600; color: #5d4e3f; }
+.input, .select, textarea.input { width: 100%; padding: 11px 13px; border: 1.5px solid var(--line); border-radius: 10px; background: #fff; outline: none; transition: border-color .15s, box-shadow .15s; min-height: 44px; }
+.input:focus, .select:focus { border-color: var(--brass); box-shadow: 0 0 0 3px rgba(181,131,47,.18); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 10px; border: 1.5px solid transparent; font-weight: 600; background: var(--espresso); color: #fff; transition: transform .05s, background .15s; }
+.btn:hover { background: var(--espresso-2); } .btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--brass); color: #231710; } .btn.primary:hover { background: var(--brass-d); color: #fff; }
+.btn.ghost { background: transparent; border-color: var(--line); color: var(--ink); } .btn.ghost:hover { background: #f3ebdc; }
+.btn.danger { background: transparent; border-color: #e7c4bf; color: var(--danger); } .btn.danger:hover { background: var(--bad-bg); }
+.btn.sm { min-height: 36px; padding: 0 12px; font-size: 14px; }
+.btn.block { width: 100%; margin-top: 22px; }
+.btn:focus-visible, .nav a:focus-visible, .tab:focus-visible { outline: 3px solid rgba(181,131,47,.5); outline-offset: 2px; }
+.error-msg { background: var(--bad-bg); color: var(--danger); padding: 10px 12px; border-radius: 10px; margin-top: 16px; font-size: 14px; }
+.demo { margin-top: 26px; padding-top: 16px; border-top: 1px dashed var(--line); font-size: 13px; color: var(--muted); }
+.demo button { background: none; border: 0; padding: 3px 0; color: var(--brass-d); text-decoration: underline; text-align: start; display: block; }
+.lang-switch { display: inline-flex; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+.lang-switch button { color: var(--ink); border: 0; background: transparent; padding: 7px 12px; font-weight: 600; min-height: 36px; }
+.lang-switch button.on { background: var(--espresso); color: #fff; }
+.topbar-m .lang-switch button.on, .side-foot .lang-switch button.on { background: var(--brass); color: #231710; }
+
+/* ---------- Shell ---------- */
+.shell { display: grid; grid-template-columns: var(--sidebar) 1fr; min-height: 100vh; }
+.sidebar { background: var(--espresso); color: #e8dcc8; display: flex; flex-direction: column; padding: 22px 14px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.sidebar .brand { display: flex; gap: 12px; align-items: center; padding: 4px 8px 22px; }
+.sidebar .brand b { font-family: var(--font-display); font-size: 19px; line-height: 1.1; color: #fff; display: block; }
+.sidebar .brand small { color: #b9a78d; font-size: 12px; }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav a { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; color: #d8c9b1; text-decoration: none; font-weight: 500; min-height: 44px; }
+.nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+.nav a.active { background: var(--brass); color: #231710; font-weight: 700; }
+.nav a .nl { flex: 1; }
+.nav a .ic { width: 22px; text-align: center; font-size: 17px; flex: none; }
+.nav a .soon { margin-inline-start: auto; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; opacity: .6; border: 1px solid currentColor; border-radius: 6px; padding: 1px 5px; }
+.side-foot { margin-top: auto; padding: 14px 8px 0; border-top: 1px solid rgba(255,255,255,.1); }
+.me { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--brass); color: #231710; display: grid; place-items: center; font-weight: 700; flex: none; }
+.me b { display: block; color: #fff; font-size: 14px; } .me small { color: #b9a78d; }
+.side-foot .btn { width: 100%; background: rgba(255,255,255,.08); } .side-foot .btn:hover { background: rgba(255,255,255,.16); }
+.side-foot .lang-switch { margin-bottom: 10px; width: 100%; } .side-foot .lang-switch button { flex: 1; }
+.main { min-width: 0; padding: 28px 34px 60px; }
+.topbar-m { display: none; }
+.page-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 14px; margin-bottom: 22px; }
+.page-head h1 { font-size: 32px; }
+.page-head .sub { color: var(--muted); margin-top: 2px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.toolbar .input, .toolbar .select { width: auto; min-width: 150px; }
+.toolbar .grow { flex: 1; min-width: 180px; }
+
+/* ---------- Cards / stats ---------- */
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+.card h3 { font-size: 18px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 18px; }
+.stat { position: relative; overflow: hidden; }
+.stat .k { font-size: 13px; color: var(--muted); font-weight: 600; }
+.stat .v { font-family: var(--font-display); font-size: 30px; font-weight: 600; margin-top: 6px; white-space: nowrap; }
+.stat .s { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+.stat::before { content: ""; position: absolute; inset-inline-start: 0; top: 0; bottom: 0; width: 4px; background: var(--c, var(--brass)); }
+.stat.profit { background: var(--espresso); color: #fff; border-color: var(--espresso); } .stat.profit .k, .stat.profit .s { color: #cdbca3; }
+.stat .v.neg { color: #ff9b8f; }
+.grid-2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; margin-bottom: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* Chart */
+.chart { width: 100%; height: 230px; display: block; }
+.chart text { font-family: var(--font-body); fill: var(--muted); font-size: 11px; }
+.chart .val { fill: var(--ink); font-weight: 600; }
+.bar-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.bar-row .top { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.bar-track { height: 8px; border-radius: 6px; background: #efe6d6; overflow: hidden; } .bar-fill { height: 100%; border-radius: 6px; background: var(--c, var(--brass)); }
+.list { list-style: none; margin: 0; padding: 0; } .list li { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); align-items: center; } .list li:last-child { border: 0; }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.badge.ok { background: var(--ok-bg); color: #3d5224; } .badge.low { background: var(--bad-bg); color: var(--danger); } .badge.off { background: #ece6dc; color: #6e6254; }
+.badge.warn { background: var(--warn-bg); color: #8a5a10; }
+.badge.mv-purchase { background: var(--ok-bg); color: #3d5224; } .badge.mv-sale { background: #e5ecf3; color: #2e4a66; } .badge.mv-adjustment { background: var(--warn-bg); color: #8a5a10; } .badge.mv-waste { background: var(--bad-bg); color: var(--danger); } .badge.mv-return { background: #ece4f3; color: #5a3f78; }
+.alert { background: var(--bad-bg); color: #7d1f19; border: 1px solid #efc3bd; padding: 12px 16px; border-radius: 12px; margin-bottom: 16px; display: flex; gap: 10px; align-items: center; font-weight: 600; }
+
+/* Tables */
+.table-wrap { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: start; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 12px 14px; background: #f5eddf; white-space: nowrap; }
+td { padding: 12px 14px; border-top: 1px solid var(--line); vertical-align: middle; }
+tr:hover td { background: #fbf6ec; }
+td.r, th.r { text-align: end; } td.act { white-space: nowrap; text-align: end; }
+.prod-cell { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+.thumb { width: 44px; height: 44px; border-radius: 12px; background: #f1e6d1; display: grid; place-items: center; font-size: 24px; overflow: hidden; flex: none; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.pos { color: var(--olive); font-weight: 600; } .neg { color: var(--danger); font-weight: 600; }
+.empty { padding: 40px; text-align: center; color: var(--muted); }
+.tabs { display: inline-flex; gap: 4px; background: #efe6d6; padding: 4px; border-radius: 12px; margin-bottom: 16px; }
+.tab { border: 0; background: transparent; padding: 9px 16px; border-radius: 9px; font-weight: 600; color: #6e5f4e; min-height: 40px; }
+.tab.on { background: var(--paper); color: var(--ink); box-shadow: var(--shadow); }
+.cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.cat-card { display: flex; gap: 14px; align-items: center; }
+.cat-card .ico { width: 54px; height: 54px; border-radius: 14px; background: #f1e6d1; display: grid; place-items: center; font-size: 28px; flex: none; }
+.cat-card .nm { font-weight: 700; } .cat-card .ar { font-size: 14px; color: var(--muted); }
+.cat-card .row-act { margin-inline-start: auto; display: flex; gap: 6px; }
+
+/* Modal */
+.overlay { position: fixed; inset: 0; background: rgba(30,18,12,.55); display: grid; place-items: center; padding: 16px; z-index: 50; animation: fade .15s; }
+.modal { background: var(--paper); width: 100%; max-width: 520px; max-height: calc(100vh - 32px); overflow-y: auto; border-radius: 18px; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+.modal h2 { font-size: 24px; margin-bottom: 4px; }
+.modal .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-foot { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+.switch { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
+.switch input { width: 20px; height: 20px; accent-color: var(--brass-d); }
+.img-pick { display: flex; gap: 12px; align-items: center; }
+.hint { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.preview-box { background: #f5eddf; border-radius: 10px; padding: 12px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; margin-top: 14px; }
+.preview-box b { display: block; font-size: 16px; } .preview-box small { color: var(--muted); }
+.toast { position: fixed; bottom: 86px; inset-inline: 0; margin: auto; width: max-content; max-width: 90vw; background: var(--espresso); color: #fff; padding: 12px 20px; border-radius: 12px; z-index: 80; box-shadow: var(--shadow); animation: fade .2s; }
+.toast.err { background: var(--danger); }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.coming { text-align: center; padding: 70px 20px; } .coming .big { font-size: 56px; }
+
+/* ---------- Mobile bottom nav ---------- */
+.bottom-nav { display: none; }
+.sheet { position: fixed; inset: 0; z-index: 60; background: rgba(30,18,12,.5); display: flex; align-items: flex-end; }
+.sheet-body { background: var(--paper); width: 100%; border-radius: 20px 20px 0 0; padding: 18px 14px 26px; max-height: 80vh; overflow-y: auto; }
+.sheet-body .nav a { color: var(--ink); } .sheet-body .nav a:hover { background: #f3ebdc; } .sheet-body .nav a.active { color: #231710; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1180px) { .stats { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } .grid-3 { grid-template-columns: 1fr; } }
+@media (max-width: 1024px) { :root { --sidebar: 84px; } .sidebar .brand div, .nav a span.nl, .nav a .soon, .me div, .side-foot .btn span { display: none; } .nav a { justify-content: center; } .sidebar .brand { justify-content: center; padding-inline: 0; } .me { justify-content: center; } .main { padding: 22px 20px 60px; } }
+@media (max-width: 760px) {
+  .login { grid-template-columns: 1fr; } .login-art { display: none; }
+  .shell { display: block; } .sidebar { display: none; }
+  .topbar-m { display: flex; position: sticky; top: 0; z-index: 30; align-items: center; justify-content: space-between; gap: 10px; background: var(--espresso); color: #fff; padding: 10px 14px; }
+  .topbar-m .logo-six { width: 36px; height: 36px; font-size: 20px; border-radius: 10px; } .topbar-m b { font-family: var(--font-display); font-size: 17px; }
+  .topbar-m .brand { display: flex; gap: 10px; align-items: center; }
+  .main { padding: 16px 14px 100px; } .page-head h1 { font-size: 26px; }
+  .stats { grid-template-columns: 1fr 1fr; gap: 10px; } .stat .v { font-size: 21px; } .stat { padding: 14px; }
+  .bottom-nav { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; position: fixed; bottom: 0; inset-inline: 0; background: var(--paper); border-top: 1px solid var(--line); z-index: 40; padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+  .bottom-nav a, .bottom-nav button { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; font-weight: 600; color: var(--muted); text-decoration: none; padding: 6px 2px; border: 0; background: none; border-radius: 10px; min-height: 52px; }
+  .bottom-nav .ic { font-size: 20px; } .bottom-nav .active { color: var(--brass-d); background: #f6ecd8; }
+  .modal .row { grid-template-columns: 1fr; }
+  .toolbar .input, .toolbar .select { flex: 1; min-width: 120px; }
+  /* tables → stacked cards */
+  .table-wrap { background: transparent; border: 0; box-shadow: none; overflow: visible; }
+  table, tbody, tr, td { display: block; } thead { display: none; }
+  tr { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; box-shadow: var(--shadow); }
+  td { border: 0; padding: 5px 0; display: flex; justify-content: space-between; gap: 12px; align-items: center; text-align: end; }
+  td::before { content: attr(data-label); color: var(--muted); font-size: 12.5px; font-weight: 600; text-align: start; }
+  td.first { display: block; text-align: start; padding-bottom: 8px; } td.first::before { content: none; }
+  td.act { justify-content: flex-end; padding-top: 10px; } td.act::before { content: none; }
+  tr:hover td { background: transparent; }
+}
+
+</style>
+</head>
+<body>
+<div id="root"><p style="font:18px sans-serif;padding:24px">Chargement… / جارٍ التحميل…</p></div>
+<noscript>JavaScript requis.</noscript>
+<script>window.addEventListener('error',function(e){var d=document.getElementById('__err')||document.body.appendChild(Object.assign(document.createElement('pre'),{id:'__err'}));d.style.cssText='position:fixed;z-index:99999;left:0;right:0;bottom:0;margin:0;padding:10px;background:#b3261e;color:#fff;font:12px monospace;white-space:pre-wrap';d.textContent+=(e.message||'')+' @'+(e.lineno||'')+'\n';});window.addEventListener('unhandledrejection',function(e){var d=document.createElement('pre');d.style.cssText='position:fixed;z-index:99999;left:0;right:0;bottom:0;margin:0;padding:10px;background:#b3261e;color:#fff;font:12px monospace';d.textContent='Erreur: '+(e.reason&&e.reason.message||e.reason);document.body.appendChild(d);});</script>
+<script>const LS = (() => {
+  const m = {};
+  try {
+    localStorage.setItem("__t", "1");
+    localStorage.removeItem("__t");
+    return localStorage;
+  } catch (e) {
+    return { getItem: (k) => {
+      var _a;
+      return (_a = m[k]) != null ? _a : null;
+    }, setItem: (k, v) => {
+      m[k] = String(v);
+    }, removeItem: (k) => {
+      delete m[k];
+    } };
+  }
+})();
+const LANGS = {
+  fr: {
+    meta: { name: "Fran\xE7ais", short: "FR", dir: "ltr", locale: "fr-MA" },
+    dict: {
+      app_name: "Le Six Caf\xE9 Manager",
+      tagline: "Gestion caf\xE9 \xB7 restaurant \xB7 p\xE2tisserie",
+      login_title: "Connexion",
+      show_pw: "Afficher le mot de passe",
+      login_sub: "Acc\xE9dez \xE0 votre espace de gestion",
+      email: "Email",
+      password: "Mot de passe",
+      sign_in: "Se connecter",
+      sign_out: "D\xE9connexion",
+      signing_in: "Connexion\u2026",
+      err_INVALID_CREDENTIALS: "Email ou mot de passe incorrect.",
+      err_TOO_MANY_ATTEMPTS: "Trop de tentatives. R\xE9essayez dans 5 minutes.",
+      err_FORBIDDEN: "Vous n'avez pas acc\xE8s \xE0 cette section.",
+      err_INSUFFICIENT_STOCK: "Stock insuffisant pour",
+      err_CATEGORY_NOT_EMPTY: "Cette cat\xE9gorie contient des produits. D\xE9placez-les ou d\xE9sactivez la cat\xE9gorie.",
+      err_generic: "Une erreur est survenue.",
+      err_network: "Connexion au serveur impossible.",
+      demo_accounts: "Comptes de d\xE9monstration",
+      nav_dashboard: "Tableau de bord",
+      nav_pos: "Caisse (POS)",
+      nav_products: "Produits",
+      nav_categories: "Cat\xE9gories",
+      nav_recipes: "Recettes",
+      nav_inventory: "Stock",
+      nav_purchases: "Achats",
+      nav_suppliers: "Fournisseurs",
+      nav_expenses: "D\xE9penses",
+      nav_cash: "Caisse journali\xE8re",
+      nav_employees: "Employ\xE9s",
+      nav_reports: "Rapports",
+      nav_settings: "Param\xE8tres",
+      nav_sales: "Ventes",
+      nav_more: "Plus",
+      soon: "Bient\xF4t",
+      coming_title: "Module en pr\xE9paration",
+      coming_text: "Ce module sera livr\xE9 dans la phase {phase} du d\xE9veloppement.",
+      role_admin: "Propri\xE9taire",
+      role_manager: "G\xE9rant(e)",
+      role_cashier: "Caissier(\xE8re)",
+      today: "Aujourd'hui",
+      hello: "Bonjour",
+      cancel: "Annuler",
+      save: "Enregistrer",
+      edit: "Modifier",
+      delete: "Supprimer",
+      add: "Ajouter",
+      search: "Rechercher\u2026",
+      all: "Tous",
+      active: "Actif",
+      inactive: "Inactif",
+      status: "Statut",
+      actions: "Actions",
+      loading: "Chargement\u2026",
+      no_data: "Aucune donn\xE9e",
+      saved: "Enregistr\xE9",
+      deleted: "Supprim\xE9",
+      deactivated: "Produit d\xE9sactiv\xE9 (il a d\xE9j\xE0 des ventes)",
+      confirm_delete: "Confirmer la suppression ?",
+      close: "Fermer",
+      yes: "Oui",
+      no: "Non",
+      date: "Date",
+      name: "Nom",
+      total: "Total",
+      user: "Utilisateur",
+      // dashboard
+      d_revenue: "Chiffre d'affaires du jour",
+      d_expenses: "D\xE9penses du jour",
+      d_cogs: "Co\xFBt mati\xE8res",
+      d_profit: "B\xE9n\xE9fice net",
+      d_formula: "CA \u2212 co\xFBt mati\xE8res \u2212 d\xE9penses",
+      d_sales_n: "{n} ventes",
+      d_last7: "7 derniers jours",
+      d_top: "Produits les plus vendus (7 j)",
+      d_payments: "Modes de paiement (aujourd\u2019hui)",
+      d_lowstock: "Alertes de stock",
+      d_recent: "Derni\xE8res ventes",
+      d_all_ok: "Tous les stocks sont suffisants.",
+      d_units_sold: "vendus",
+      d_min: "min.",
+      pay_cash: "Esp\xE8ces",
+      pay_card: "Carte",
+      pay_mobile: "Paiement mobile",
+      pay_mixed: "Mixte",
+      pay_transfer: "Virement",
+      // categories
+      cat_title: "Cat\xE9gories",
+      cat_new: "Nouvelle cat\xE9gorie",
+      cat_edit: "Modifier la cat\xE9gorie",
+      cat_name_fr: "Nom (fran\xE7ais)",
+      cat_name_ar: "Nom (arabe)",
+      cat_icon: "Ic\xF4ne (emoji)",
+      cat_products: "{n} produit(s)",
+      // products
+      p_title: "Produits",
+      p_new: "Nouveau produit",
+      p_edit: "Modifier le produit",
+      p_name: "Nom du produit",
+      p_category: "Cat\xE9gorie",
+      p_price: "Prix de vente (DH)",
+      p_image: "Image",
+      p_emoji: "Emoji ou ic\xF4ne",
+      p_upload: "T\xE9l\xE9verser une photo",
+      p_cost: "Co\xFBt de production",
+      p_margin: "Marge",
+      p_profit: "B\xE9n\xE9fice unitaire",
+      p_no_recipe: "Pas de recette",
+      p_recipe_hint: "Le co\xFBt est calcul\xE9 automatiquement \xE0 partir de la recette (module Recettes).",
+      p_count: "{n} produits",
+      p_deactivate_q: "Supprimer ce produit ? S\u2019il a d\xE9j\xE0 \xE9t\xE9 vendu, il sera simplement d\xE9sactiv\xE9.",
+      // inventory
+      i_title: "Stock & Inventaire",
+      i_tab_ing: "Ingr\xE9dients",
+      i_tab_mov: "Mouvements de stock",
+      i_new: "Nouvel ingr\xE9dient",
+      i_edit: "Modifier l'ingr\xE9dient",
+      i_qty: "Quantit\xE9",
+      i_unit: "Unit\xE9",
+      i_min: "Stock minimum",
+      i_cost: "Co\xFBt moyen / unit\xE9",
+      i_value: "Valeur du stock",
+      i_supplier: "Fournisseur",
+      i_initial: "Quantit\xE9 initiale",
+      i_no_supplier: "\u2014 Aucun \u2014",
+      i_low: "ALERTE STOCK BAS",
+      i_ok: "OK",
+      i_low_n: "{n} ingr\xE9dient(s) sous le stock minimum",
+      i_adjust: "Mouvement",
+      i_adjust_title: "Mouvement de stock",
+      i_type: "Type",
+      i_note: "Note (optionnel)",
+      i_current: "Stock actuel",
+      i_mode_set: "Inventaire physique (nouvelle quantit\xE9)",
+      i_mode_delta: "Ajustement (+ / \u2212)",
+      i_qty_new: "Nouvelle quantit\xE9",
+      i_qty_delta: "Quantit\xE9 (+ ou \u2212)",
+      i_waste_hint: "La quantit\xE9 sera retir\xE9e du stock.",
+      i_return_hint: "Retour au fournisseur : la quantit\xE9 sera retir\xE9e du stock.",
+      i_stock_total: "Valeur totale du stock",
+      i_all_ing: "Tous les ingr\xE9dients",
+      i_all_types: "Tous les types",
+      i_reference: "R\xE9f\xE9rence",
+      i_cost_hint: "La quantit\xE9 ne se modifie que par mouvement de stock (historique complet).",
+      mv_purchase: "Achat",
+      mv_sale: "Vente / recette",
+      mv_adjustment: "Ajustement",
+      mv_waste: "Perte",
+      mv_return: "Retour",
+      unit_kg: "KG",
+      unit_g: "Gramme",
+      unit_l: "Litre",
+      unit_ml: "Millilitre",
+      unit_piece: "Pi\xE8ce",
+      unit_box: "Bo\xEEte",
+      // settings
+      b_title: "Sauvegarde des donn\xE9es",
+      b_hint: "Les donn\xE9es sont stock\xE9es dans ce navigateur. Exportez r\xE9guli\xE8rement une sauvegarde.",
+      b_export: "Exporter",
+      b_import: "Importer",
+      b_reset: "R\xE9initialiser (donn\xE9es d\xE9mo)",
+      b_reset_q: "Toutes les donn\xE9es actuelles seront effac\xE9es et remplac\xE9es par les donn\xE9es de d\xE9monstration.",
+      b_imported: "Sauvegarde import\xE9e",
+      s_title: "Param\xE8tres",
+      s_business: "Informations de l'entreprise",
+      s_app: "Application",
+      s_business_name: "Nom de l'\xE9tablissement",
+      s_city: "Ville",
+      s_currency: "Devise",
+      s_lang: "Langue par d\xE9faut",
+      s_tax: "Activer la TVA",
+      s_tax_rate: "Taux de TVA (%)",
+      s_logo: "Logo",
+      s_neg: "Autoriser le stock n\xE9gatif (admin)",
+      s_neg_hint: "Par d\xE9faut, une vente ou une perte qui rendrait le stock n\xE9gatif est refus\xE9e.",
+      s_saved: "Param\xE8tres enregistr\xE9s"
+    }
+  },
+  ar: {
+    meta: { name: "\u0627\u0644\u0639\u0631\u0628\u064A\u0629", short: "\u0639", dir: "rtl", locale: "ar-MA-u-nu-latn" },
+    dict: {
+      app_name: "\u0644\u0648 \u0633\u064A\u0643\u0633 \u0643\u0627\u0641\u064A \u0645\u0627\u0646\u062C\u0631",
+      tagline: "\u062A\u062F\u0628\u064A\u0631 \u0627\u0644\u0645\u0642\u0647\u0649 \xB7 \u0627\u0644\u0645\u0637\u0639\u0645 \xB7 \u0627\u0644\u062D\u0644\u0648\u064A\u0627\u062A",
+      login_title: "\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062F\u062E\u0648\u0644",
+      show_pw: "\u0625\u0638\u0647\u0627\u0631 \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631",
+      login_sub: "\u0627\u062F\u062E\u0644 \u0625\u0644\u0649 \u0641\u0636\u0627\u0621 \u0627\u0644\u062A\u062F\u0628\u064A\u0631 \u0627\u0644\u062E\u0627\u0635 \u0628\u0643",
+      email: "\u0627\u0644\u0628\u0631\u064A\u062F \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A",
+      password: "\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631",
+      sign_in: "\u062F\u062E\u0648\u0644",
+      sign_out: "\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062E\u0631\u0648\u062C",
+      signing_in: "\u062C\u0627\u0631\u064D \u0627\u0644\u062F\u062E\u0648\u0644\u2026",
+      err_INVALID_CREDENTIALS: "\u0627\u0644\u0628\u0631\u064A\u062F \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A \u0623\u0648 \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631 \u063A\u064A\u0631 \u0635\u062D\u064A\u062D\u0629.",
+      err_TOO_MANY_ATTEMPTS: "\u0645\u062D\u0627\u0648\u0644\u0627\u062A \u0643\u062B\u064A\u0631\u0629. \u0623\u0639\u062F \u0627\u0644\u0645\u062D\u0627\u0648\u0644\u0629 \u0628\u0639\u062F 5 \u062F\u0642\u0627\u0626\u0642.",
+      err_FORBIDDEN: "\u0644\u064A\u0633 \u0644\u062F\u064A\u0643 \u0635\u0644\u0627\u062D\u064A\u0629 \u0627\u0644\u062F\u062E\u0648\u0644 \u0625\u0644\u0649 \u0647\u0630\u0627 \u0627\u0644\u0642\u0633\u0645.",
+      err_INSUFFICIENT_STOCK: "\u0627\u0644\u0645\u062E\u0632\u0648\u0646 \u063A\u064A\u0631 \u0643\u0627\u0641\u064D \u0644\u0640",
+      err_CATEGORY_NOT_EMPTY: "\u0647\u0630\u0647 \u0627\u0644\u0641\u0626\u0629 \u062A\u062D\u062A\u0648\u064A \u0639\u0644\u0649 \u0645\u0646\u062A\u062C\u0627\u062A. \u0627\u0646\u0642\u0644\u0647\u0627 \u0623\u0648 \u0639\u0637\u0651\u0644 \u0627\u0644\u0641\u0626\u0629.",
+      err_generic: "\u062D\u062F\u062B \u062E\u0637\u0623.",
+      err_network: "\u062A\u0639\u0630\u0651\u0631 \u0627\u0644\u0627\u062A\u0635\u0627\u0644 \u0628\u0627\u0644\u062E\u0627\u062F\u0645.",
+      demo_accounts: "\u062D\u0633\u0627\u0628\u0627\u062A \u062A\u062C\u0631\u064A\u0628\u064A\u0629",
+      nav_dashboard: "\u0644\u0648\u062D\u0629 \u0627\u0644\u0642\u064A\u0627\u062F\u0629",
+      nav_pos: "\u0646\u0642\u0637\u0629 \u0627\u0644\u0628\u064A\u0639",
+      nav_products: "\u0627\u0644\u0645\u0646\u062A\u062C\u0627\u062A",
+      nav_categories: "\u0627\u0644\u0641\u0626\u0627\u062A",
+      nav_recipes: "\u0627\u0644\u0648\u0635\u0641\u0627\u062A",
+      nav_inventory: "\u0627\u0644\u0645\u062E\u0632\u0648\u0646",
+      nav_purchases: "\u0627\u0644\u0645\u0634\u062A\u0631\u064A\u0627\u062A",
+      nav_suppliers: "\u0627\u0644\u0645\u0648\u0631\u062F\u0648\u0646",
+      nav_expenses: "\u0627\u0644\u0645\u0635\u0627\u0631\u064A\u0641",
+      nav_cash: "\u0627\u0644\u0635\u0646\u062F\u0648\u0642 \u0627\u0644\u064A\u0648\u0645\u064A",
+      nav_employees: "\u0627\u0644\u0645\u0648\u0638\u0641\u0648\u0646",
+      nav_reports: "\u0627\u0644\u062A\u0642\u0627\u0631\u064A\u0631",
+      nav_settings: "\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A",
+      nav_sales: "\u0627\u0644\u0645\u0628\u064A\u0639\u0627\u062A",
+      nav_more: "\u0627\u0644\u0645\u0632\u064A\u062F",
+      soon: "\u0642\u0631\u064A\u0628\u0627\u064B",
+      coming_title: "\u0627\u0644\u0648\u062D\u062F\u0629 \u0642\u064A\u062F \u0627\u0644\u0625\u0639\u062F\u0627\u062F",
+      coming_text: "\u0633\u062A\u062A\u0648\u0641\u0631 \u0647\u0630\u0647 \u0627\u0644\u0648\u062D\u062F\u0629 \u0641\u064A \u0627\u0644\u0645\u0631\u062D\u0644\u0629 {phase} \u0645\u0646 \u0627\u0644\u062A\u0637\u0648\u064A\u0631.",
+      role_admin: "\u0627\u0644\u0645\u0627\u0644\u0643",
+      role_manager: "\u0627\u0644\u0645\u0633\u064A\u0651\u0631",
+      role_cashier: "\u0623\u0645\u064A\u0646 \u0627\u0644\u0635\u0646\u062F\u0648\u0642",
+      today: "\u0627\u0644\u064A\u0648\u0645",
+      hello: "\u0645\u0631\u062D\u0628\u0627\u064B",
+      cancel: "\u0625\u0644\u063A\u0627\u0621",
+      save: "\u062D\u0641\u0638",
+      edit: "\u062A\u0639\u062F\u064A\u0644",
+      delete: "\u062D\u0630\u0641",
+      add: "\u0625\u0636\u0627\u0641\u0629",
+      search: "\u0628\u062D\u062B\u2026",
+      all: "\u0627\u0644\u0643\u0644",
+      active: "\u0646\u0634\u0637",
+      inactive: "\u063A\u064A\u0631 \u0646\u0634\u0637",
+      status: "\u0627\u0644\u062D\u0627\u0644\u0629",
+      actions: "\u0625\u062C\u0631\u0627\u0621\u0627\u062A",
+      loading: "\u062C\u0627\u0631\u064D \u0627\u0644\u062A\u062D\u0645\u064A\u0644\u2026",
+      no_data: "\u0644\u0627 \u062A\u0648\u062C\u062F \u0628\u064A\u0627\u0646\u0627\u062A",
+      saved: "\u062A\u0645 \u0627\u0644\u062D\u0641\u0638",
+      deleted: "\u062A\u0645 \u0627\u0644\u062D\u0630\u0641",
+      deactivated: "\u062A\u0645 \u062A\u0639\u0637\u064A\u0644 \u0627\u0644\u0645\u0646\u062A\u062C (\u0644\u062F\u064A\u0647 \u0645\u0628\u064A\u0639\u0627\u062A \u0633\u0627\u0628\u0642\u0629)",
+      confirm_delete: "\u062A\u0623\u0643\u064A\u062F \u0627\u0644\u062D\u0630\u0641\u061F",
+      close: "\u0625\u063A\u0644\u0627\u0642",
+      yes: "\u0646\u0639\u0645",
+      no: "\u0644\u0627",
+      date: "\u0627\u0644\u062A\u0627\u0631\u064A\u062E",
+      name: "\u0627\u0644\u0627\u0633\u0645",
+      total: "\u0627\u0644\u0645\u062C\u0645\u0648\u0639",
+      user: "\u0627\u0644\u0645\u0633\u062A\u062E\u062F\u0645",
+      d_revenue: "\u0645\u0628\u064A\u0639\u0627\u062A \u0627\u0644\u064A\u0648\u0645",
+      d_expenses: "\u0645\u0635\u0627\u0631\u064A\u0641 \u0627\u0644\u064A\u0648\u0645",
+      d_cogs: "\u062A\u0643\u0644\u0641\u0629 \u0627\u0644\u0645\u0648\u0627\u062F",
+      d_profit: "\u0627\u0644\u0631\u0628\u062D \u0627\u0644\u0635\u0627\u0641\u064A",
+      d_formula: "\u0627\u0644\u0645\u0628\u064A\u0639\u0627\u062A \u2212 \u062A\u0643\u0644\u0641\u0629 \u0627\u0644\u0645\u0648\u0627\u062F \u2212 \u0627\u0644\u0645\u0635\u0627\u0631\u064A\u0641",
+      d_sales_n: "{n} \u0639\u0645\u0644\u064A\u0629 \u0628\u064A\u0639",
+      d_last7: "\u0622\u062E\u0631 7 \u0623\u064A\u0627\u0645",
+      d_top: "\u0627\u0644\u0623\u0643\u062B\u0631 \u0645\u0628\u064A\u0639\u0627\u064B (7 \u0623\u064A\u0627\u0645)",
+      d_payments: "\u0637\u0631\u0642 \u0627\u0644\u062F\u0641\u0639 (\u0627\u0644\u064A\u0648\u0645)",
+      d_lowstock: "\u062A\u0646\u0628\u064A\u0647\u0627\u062A \u0627\u0644\u0645\u062E\u0632\u0648\u0646",
+      d_recent: "\u0622\u062E\u0631 \u0627\u0644\u0645\u0628\u064A\u0639\u0627\u062A",
+      d_all_ok: "\u062C\u0645\u064A\u0639 \u0627\u0644\u0645\u062E\u0632\u0648\u0646\u0627\u062A \u0643\u0627\u0641\u064A\u0629.",
+      d_units_sold: "\u0645\u0628\u0627\u0639",
+      d_min: "\u0627\u0644\u062D\u062F \u0627\u0644\u0623\u062F\u0646\u0649",
+      pay_cash: "\u0646\u0642\u062F\u0627\u064B",
+      pay_card: "\u0628\u0637\u0627\u0642\u0629",
+      pay_mobile: "\u062F\u0641\u0639 \u0639\u0628\u0631 \u0627\u0644\u0647\u0627\u062A\u0641",
+      pay_mixed: "\u0645\u062E\u062A\u0644\u0637",
+      pay_transfer: "\u062A\u062D\u0648\u064A\u0644",
+      cat_title: "\u0627\u0644\u0641\u0626\u0627\u062A",
+      cat_new: "\u0641\u0626\u0629 \u062C\u062F\u064A\u062F\u0629",
+      cat_edit: "\u062A\u0639\u062F\u064A\u0644 \u0627\u0644\u0641\u0626\u0629",
+      cat_name_fr: "\u0627\u0644\u0627\u0633\u0645 (\u0641\u0631\u0646\u0633\u064A\u0629)",
+      cat_name_ar: "\u0627\u0644\u0627\u0633\u0645 (\u0639\u0631\u0628\u064A\u0629)",
+      cat_icon: "\u0623\u064A\u0642\u0648\u0646\u0629 (\u0625\u064A\u0645\u0648\u062C\u064A)",
+      cat_products: "{n} \u0645\u0646\u062A\u062C",
+      p_title: "\u0627\u0644\u0645\u0646\u062A\u062C\u0627\u062A",
+      p_new: "\u0645\u0646\u062A\u062C \u062C\u062F\u064A\u062F",
+      p_edit: "\u062A\u0639\u062F\u064A\u0644 \u0627\u0644\u0645\u0646\u062A\u062C",
+      p_name: "\u0627\u0633\u0645 \u0627\u0644\u0645\u0646\u062A\u062C",
+      p_category: "\u0627\u0644\u0641\u0626\u0629",
+      p_price: "\u0633\u0639\u0631 \u0627\u0644\u0628\u064A\u0639 (\u062F\u0631\u0647\u0645)",
+      p_image: "\u0627\u0644\u0635\u0648\u0631\u0629",
+      p_emoji: "\u0625\u064A\u0645\u0648\u062C\u064A \u0623\u0648 \u0623\u064A\u0642\u0648\u0646\u0629",
+      p_upload: "\u0631\u0641\u0639 \u0635\u0648\u0631\u0629",
+      p_cost: "\u062A\u0643\u0644\u0641\u0629 \u0627\u0644\u0625\u0646\u062A\u0627\u062C",
+      p_margin: "\u0627\u0644\u0647\u0627\u0645\u0634",
+      p_profit: "\u0627\u0644\u0631\u0628\u062D \u0644\u0644\u0648\u062D\u062F\u0629",
+      p_no_recipe: "\u0628\u062F\u0648\u0646 \u0648\u0635\u0641\u0629",
+      p_recipe_hint: "\u062A\u064F\u062D\u0633\u0628 \u0627\u0644\u062A\u0643\u0644\u0641\u0629 \u062A\u0644\u0642\u0627\u0626\u064A\u0627\u064B \u0627\u0646\u0637\u0644\u0627\u0642\u0627\u064B \u0645\u0646 \u0627\u0644\u0648\u0635\u0641\u0629 (\u0648\u062D\u062F\u0629 \u0627\u0644\u0648\u0635\u0641\u0627\u062A).",
+      p_count: "{n} \u0645\u0646\u062A\u062C",
+      p_deactivate_q: "\u062D\u0630\u0641 \u0647\u0630\u0627 \u0627\u0644\u0645\u0646\u062A\u062C\u061F \u0625\u0630\u0627 \u0633\u0628\u0642 \u0628\u064A\u0639\u0647 \u0641\u0633\u064A\u062A\u0645 \u062A\u0639\u0637\u064A\u0644\u0647 \u0641\u0642\u0637.",
+      i_title: "\u0627\u0644\u0645\u062E\u0632\u0648\u0646 \u0648\u0627\u0644\u062C\u0631\u062F",
+      i_tab_ing: "\u0627\u0644\u0645\u0643\u0648\u0651\u0646\u0627\u062A",
+      i_tab_mov: "\u062D\u0631\u0643\u0627\u062A \u0627\u0644\u0645\u062E\u0632\u0648\u0646",
+      i_new: "\u0645\u0643\u0648\u0651\u0646 \u062C\u062F\u064A\u062F",
+      i_edit: "\u062A\u0639\u062F\u064A\u0644 \u0627\u0644\u0645\u0643\u0648\u0651\u0646",
+      i_qty: "\u0627\u0644\u0643\u0645\u064A\u0629",
+      i_unit: "\u0627\u0644\u0648\u062D\u062F\u0629",
+      i_min: "\u0627\u0644\u062D\u062F \u0627\u0644\u0623\u062F\u0646\u0649 \u0644\u0644\u0645\u062E\u0632\u0648\u0646",
+      i_cost: "\u0645\u062A\u0648\u0633\u0637 \u0627\u0644\u062A\u0643\u0644\u0641\u0629 / \u0627\u0644\u0648\u062D\u062F\u0629",
+      i_value: "\u0642\u064A\u0645\u0629 \u0627\u0644\u0645\u062E\u0632\u0648\u0646",
+      i_supplier: "\u0627\u0644\u0645\u0648\u0631\u062F",
+      i_initial: "\u0627\u0644\u0643\u0645\u064A\u0629 \u0627\u0644\u0623\u0648\u0644\u064A\u0629",
+      i_no_supplier: "\u2014 \u0628\u062F\u0648\u0646 \u2014",
+      i_low: "\u062A\u0646\u0628\u064A\u0647: \u0645\u062E\u0632\u0648\u0646 \u0645\u0646\u062E\u0641\u0636",
+      i_ok: "\u062C\u064A\u062F",
+      i_low_n: "{n} \u0645\u0643\u0648\u0651\u0646(\u0627\u062A) \u062A\u062D\u062A \u0627\u0644\u062D\u062F \u0627\u0644\u0623\u062F\u0646\u0649",
+      i_adjust: "\u062D\u0631\u0643\u0629",
+      i_adjust_title: "\u062D\u0631\u0643\u0629 \u0645\u062E\u0632\u0648\u0646",
+      i_type: "\u0627\u0644\u0646\u0648\u0639",
+      i_note: "\u0645\u0644\u0627\u062D\u0638\u0629 (\u0627\u062E\u062A\u064A\u0627\u0631\u064A)",
+      i_current: "\u0627\u0644\u0645\u062E\u0632\u0648\u0646 \u0627\u0644\u062D\u0627\u0644\u064A",
+      i_mode_set: "\u062C\u0631\u062F \u0641\u0639\u0644\u064A (\u0627\u0644\u0643\u0645\u064A\u0629 \u0627\u0644\u062C\u062F\u064A\u062F\u0629)",
+      i_mode_delta: "\u062A\u0639\u062F\u064A\u0644 (+ / \u2212)",
+      i_qty_new: "\u0627\u0644\u0643\u0645\u064A\u0629 \u0627\u0644\u062C\u062F\u064A\u062F\u0629",
+      i_qty_delta: "\u0627\u0644\u0643\u0645\u064A\u0629 (+ \u0623\u0648 \u2212)",
+      i_waste_hint: "\u0633\u062A\u064F\u062E\u0635\u0645 \u0627\u0644\u0643\u0645\u064A\u0629 \u0645\u0646 \u0627\u0644\u0645\u062E\u0632\u0648\u0646.",
+      i_return_hint: "\u0625\u0631\u062C\u0627\u0639 \u0625\u0644\u0649 \u0627\u0644\u0645\u0648\u0631\u062F: \u0633\u062A\u064F\u062E\u0635\u0645 \u0627\u0644\u0643\u0645\u064A\u0629 \u0645\u0646 \u0627\u0644\u0645\u062E\u0632\u0648\u0646.",
+      i_stock_total: "\u0627\u0644\u0642\u064A\u0645\u0629 \u0627\u0644\u0625\u062C\u0645\u0627\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0648\u0646",
+      i_all_ing: "\u062C\u0645\u064A\u0639 \u0627\u0644\u0645\u0643\u0648\u0651\u0646\u0627\u062A",
+      i_all_types: "\u062C\u0645\u064A\u0639 \u0627\u0644\u0623\u0646\u0648\u0627\u0639",
+      i_reference: "\u0627\u0644\u0645\u0631\u062C\u0639",
+      i_cost_hint: "\u0644\u0627 \u062A\u062A\u063A\u064A\u0631 \u0627\u0644\u0643\u0645\u064A\u0629 \u0625\u0644\u0627 \u0639\u0628\u0631 \u062D\u0631\u0643\u0629 \u0645\u062E\u0632\u0648\u0646 (\u0633\u062C\u0644 \u0643\u0627\u0645\u0644).",
+      mv_purchase: "\u0634\u0631\u0627\u0621",
+      mv_sale: "\u0628\u064A\u0639 / \u0648\u0635\u0641\u0629",
+      mv_adjustment: "\u062A\u0639\u062F\u064A\u0644",
+      mv_waste: "\u0647\u062F\u0631",
+      mv_return: "\u0625\u0631\u062C\u0627\u0639",
+      unit_kg: "\u0643\u064A\u0644\u0648\u063A\u0631\u0627\u0645",
+      unit_g: "\u063A\u0631\u0627\u0645",
+      unit_l: "\u0644\u062A\u0631",
+      unit_ml: "\u0645\u0644\u064A\u0644\u062A\u0631",
+      unit_piece: "\u0642\u0637\u0639\u0629",
+      unit_box: "\u0639\u0644\u0628\u0629",
+      b_title: "\u0646\u0633\u062E \u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0627\u064B",
+      b_hint: "\u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u0645\u062E\u0632\u0651\u0646\u0629 \u0641\u064A \u0647\u0630\u0627 \u0627\u0644\u0645\u062A\u0635\u0641\u062D. \u0635\u062F\u0651\u0631 \u0646\u0633\u062E\u0629 \u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0628\u0627\u0646\u062A\u0638\u0627\u0645.",
+      b_export: "\u062A\u0635\u062F\u064A\u0631",
+      b_import: "\u0627\u0633\u062A\u064A\u0631\u0627\u062F",
+      b_reset: "\u0625\u0639\u0627\u062F\u0629 \u0627\u0644\u062A\u0639\u064A\u064A\u0646 (\u0628\u064A\u0627\u0646\u0627\u062A \u062A\u062C\u0631\u064A\u0628\u064A\u0629)",
+      b_reset_q: "\u0633\u064A\u062A\u0645 \u0645\u0633\u062D \u062C\u0645\u064A\u0639 \u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u062D\u0627\u0644\u064A\u0629 \u0648\u0627\u0633\u062A\u0628\u062F\u0627\u0644\u0647\u0627 \u0628\u0628\u064A\u0627\u0646\u0627\u062A \u062A\u062C\u0631\u064A\u0628\u064A\u0629.",
+      b_imported: "\u062A\u0645 \u0627\u0633\u062A\u064A\u0631\u0627\u062F \u0627\u0644\u0646\u0633\u062E\u0629",
+      s_title: "\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A",
+      s_business: "\u0645\u0639\u0644\u0648\u0645\u0627\u062A \u0627\u0644\u0645\u0624\u0633\u0633\u0629",
+      s_app: "\u0627\u0644\u062A\u0637\u0628\u064A\u0642",
+      s_business_name: "\u0627\u0633\u0645 \u0627\u0644\u0645\u0624\u0633\u0633\u0629",
+      s_city: "\u0627\u0644\u0645\u062F\u064A\u0646\u0629",
+      s_currency: "\u0627\u0644\u0639\u0645\u0644\u0629",
+      s_lang: "\u0627\u0644\u0644\u063A\u0629 \u0627\u0644\u0627\u0641\u062A\u0631\u0627\u0636\u064A\u0629",
+      s_tax: "\u062A\u0641\u0639\u064A\u0644 \u0627\u0644\u0636\u0631\u064A\u0628\u0629",
+      s_tax_rate: "\u0646\u0633\u0628\u0629 \u0627\u0644\u0636\u0631\u064A\u0628\u0629 (%)",
+      s_logo: "\u0627\u0644\u0634\u0639\u0627\u0631",
+      s_neg: "\u0627\u0644\u0633\u0645\u0627\u062D \u0628\u0645\u062E\u0632\u0648\u0646 \u0633\u0627\u0644\u0628 (\u0645\u062F\u064A\u0631 \u0627\u0644\u0646\u0638\u0627\u0645)",
+      s_neg_hint: "\u0627\u0641\u062A\u0631\u0627\u0636\u064A\u0627\u064B \u064A\u064F\u0631\u0641\u0636 \u0623\u064A \u0628\u064A\u0639 \u0623\u0648 \u0647\u062F\u0631 \u064A\u062C\u0639\u0644 \u0627\u0644\u0645\u062E\u0632\u0648\u0646 \u0633\u0627\u0644\u0628\u0627\u064B.",
+      s_saved: "\u062A\u0645 \u062D\u0641\u0638 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A"
+    }
+  }
+};
+let currentLang = LS.getItem("lang") || "fr";
+if (!LANGS[currentLang]) currentLang = "fr";
+function t(key, vars) {
+  var _a, _b;
+  let s = (_b = (_a = LANGS[currentLang].dict[key]) != null ? _a : LANGS.fr.dict[key]) != null ? _b : key;
+  if (vars) for (const k in vars) s = s.replaceAll("{" + k + "}", vars[k]);
+  return s;
+}
+function setLang(l) {
+  if (!LANGS[l]) l = "fr";
+  currentLang = l;
+  LS.setItem("lang", l);
+  document.documentElement.lang = l;
+  document.documentElement.dir = LANGS[l].meta.dir;
+}
+function money(n, label = "DH") {
+  const v = Math.round((Number(n) || 0) * 100) / 100;
+  const [i, d] = Math.abs(v).toFixed(2).split(".");
+  const grouped = i.replace(/\B(?=(\d{3})+(?!\d))/g, "\xA0");
+  return (v < 0 ? "-" : "") + grouped + (d === "00" ? "" : "." + d) + "\xA0" + label;
+}
+function qty(n) {
+  const v = Math.round((Number(n) || 0) * 1e3) / 1e3;
+  const [i, d] = String(v).split(".");
+  return i.replace(/\B(?=(\d{3})+(?!\d))/g, "\xA0") + (d ? "." + d : "");
+}
+function unitCost(n) {
+  const v = Math.round((Number(n) || 0) * 1e4) / 1e4;
+  return String(v);
+}
+function fmtDate(s, withTime = true) {
+  if (!s) return "";
+  const [d, tm = ""] = s.split(" ");
+  const [y, m, day] = d.split("-");
+  return `${day}/${m}/${y}` + (withTime && tm ? " " + tm.slice(0, 5) : "");
+}
+</script>
+<script>const LocalAPI = (() => {
+  const KEY = "lesix_db_v1", SESSION = "lesix_session_v1", TZ = "Africa/Casablanca";
+  let DB = null;
+  const mem = {};
+  const store = (() => {
+    try {
+      const k = "__t";
+      localStorage.setItem(k, "1");
+      localStorage.removeItem(k);
+      return localStorage;
+    } catch {
+      return { getItem: (k) => {
+        var _a;
+        return (_a = mem[k]) != null ? _a : null;
+      }, setItem: (k, v) => {
+        mem[k] = String(v);
+      }, removeItem: (k) => {
+        delete mem[k];
+      } };
+    }
+  })();
+  const parts = (d = /* @__PURE__ */ new Date()) => {
+    const f = new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).formatToParts(d).reduce((a, p) => (a[p.type] = p.value, a), {});
+    if (f.hour === "24") f.hour = "00";
+    return f;
+  };
+  const now = () => {
+    const p = parts();
+    return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
+  };
+  const today = () => {
+    const p = parts();
+    return `${p.year}-${p.month}-${p.day}`;
+  };
+  const addDays = (s, n) => {
+    const d = /* @__PURE__ */ new Date(s + "T12:00:00Z");
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().slice(0, 10);
+  };
+  const num = (v, def = 0) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : def;
+  };
+  const err = (status, error, detail) => ({ status, error, detail });
+  const sum = (a, f) => a.reduce((x, y) => x + f(y), 0);
+  const save = () => {
+    try {
+      store.setItem(KEY, JSON.stringify(DB));
+    } catch (e) {
+      throw err(507, "BAD_REQUEST", "Stockage du navigateur plein");
+    }
+  };
+  const nextId = (t) => DB.seq[t] = (DB.seq[t] || 0) + 1;
+  const insert = (t, row) => {
+    row.id = nextId(t);
+    DB[t].push(row);
+    return row;
+  };
+  function sha256js(str) {
+    const b = new TextEncoder().encode(str), K = [], H = [1779033703, 3144134277, 1013904242, 2773480762, 1359893119, 2600822924, 528734635, 1541459225];
+    for (let n = 2, c = 0; c < 64; n++) {
+      let p = true;
+      for (let d = 2; d * d <= n; d++) if (n % d === 0) {
+        p = false;
+        break;
+      }
+      if (p) K[c++] = Math.cbrt(n) % 1 * 4294967296 | 0;
+    }
+    const l = b.length, w = new Uint32Array(l + 9 + 63 >> 6 << 4);
+    b.forEach((v, i) => w[i >> 2] |= v << 24 - i % 4 * 8);
+    w[l >> 2] |= 128 << 24 - l % 4 * 8;
+    w[w.length - 1] = l * 8;
+    const rot = (x, n) => x >>> n | x << 32 - n;
+    for (let o = 0; o < w.length; o += 16) {
+      const W = Array.from(w.slice(o, o + 16));
+      for (let i = 16; i < 64; i++) W[i] = W[i - 16] + (rot(W[i - 15], 7) ^ rot(W[i - 15], 18) ^ W[i - 15] >>> 3) + W[i - 7] + (rot(W[i - 2], 17) ^ rot(W[i - 2], 19) ^ W[i - 2] >>> 10) | 0;
+      let [a, b2, c, d, e, f, g, h] = H;
+      for (let i = 0; i < 64; i++) {
+        const t1 = h + (rot(e, 6) ^ rot(e, 11) ^ rot(e, 25)) + (e & f ^ ~e & g) + K[i] + W[i] | 0, t2 = (rot(a, 2) ^ rot(a, 13) ^ rot(a, 22)) + (a & b2 ^ a & c ^ b2 & c) | 0;
+        h = g;
+        g = f;
+        f = e;
+        e = d + t1 | 0;
+        d = c;
+        c = b2;
+        b2 = a;
+        a = t1 + t2 | 0;
+      }
+      [a, b2, c, d, e, f, g, h].forEach((v, i) => H[i] = H[i] + v | 0);
+    }
+    return H.map((v) => (v >>> 0).toString(16).padStart(8, "0")).join("");
+  }
+  const hash = async (pw) => {
+    const s = "lesix:" + pw;
+    try {
+      if (crypto && crypto.subtle) return [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))].map((b) => b.toString(16).padStart(2, "0")).join("");
+    } catch {
+    }
+    return sha256js(s);
+  };
+  const setting = (k, d = null) => {
+    var _a;
+    return (_a = DB.settings[k]) != null ? _a : d;
+  };
+  function applyStockMovement({ ingredientId, quantity, type, userId, reference = null, note = null, unitCost = null, allowNegative = false, at = null }) {
+    const ing = DB.ingredients.find((i) => i.id === ingredientId);
+    if (!ing) throw err(400, "BAD_REQUEST", "Ingredient not found");
+    const q = +(ing.current_quantity + quantity).toFixed(6);
+    if (q < 0 && !allowNegative) throw err(409, "INSUFFICIENT_STOCK", ing.name);
+    ing.current_quantity = q;
+    insert("stock_movements", { ingredient_id: ingredientId, quantity, movement_type: type, unit_cost: unitCost != null ? unitCost : ing.avg_cost, reference, note, user_id: userId, created_at: at || now() });
+    return q;
+  }
+  const recipeOf = (pid) => {
+    const r = DB.recipes.find((x) => x.product_id === pid);
+    return r ? DB.recipe_items.filter((i) => i.recipe_id === r.id) : [];
+  };
+  const productCost = (pid) => sum(recipeOf(pid), (ri) => {
+    var _a;
+    return ri.quantity * (((_a = DB.ingredients.find((i) => i.id === ri.ingredient_id)) == null ? void 0 : _a.avg_cost) || 0);
+  });
+  async function seed() {
+    var _a;
+    let s = 2026;
+    const rand = () => (s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296;
+    const pick = (a) => a[Math.floor(rand() * a.length)], between = (a, b) => a + Math.floor(rand() * (b - a + 1));
+    DB = {
+      seq: {},
+      settings: { business_name: "Le Six Caf\xE9-Restaurant-P\xE2tisserie", city: "F\xE8s", currency: "MAD", currency_label: "DH", default_language: "fr", tax_enabled: "0", tax_rate: "10", allow_negative_stock: "0" },
+      users: [],
+      employees: [],
+      categories: [],
+      suppliers: [],
+      ingredients: [],
+      products: [],
+      recipes: [],
+      recipe_items: [],
+      purchases: [],
+      purchase_items: [],
+      stock_movements: [],
+      cash_registers: [],
+      sales: [],
+      sale_items: [],
+      payments: [],
+      expenses: [],
+      cash_transactions: [],
+      daily_closures: []
+    };
+    const mk = async (email, pw, name, role, position, phone, salary) => {
+      const u = insert("users", { email, password_hash: await hash(pw), name, role, language: "fr", active: 1, created_at: now() });
+      insert("employees", { user_id: u.id, name, position, email, phone, role, salary, active: 1 });
+      return u.id;
+    };
+    const admin = await mk("admin@lesix.ma", "admin123", "Mohamed Alaoui", "admin", "Propri\xE9taire", "0661-112233", 0);
+    const manager = await mk("manager@lesix.ma", "manager123", "Salma Bennani", "manager", "G\xE9rante", "0662-445566", 5500);
+    const c1 = await mk("caissier@lesix.ma", "cashier123", "Youssef Idrissi", "cashier", "Caissier", "0663-778899", 3200);
+    const c2 = await mk("caissier2@lesix.ma", "cashier123", "Khadija Tazi", "cashier", "Caissi\xE8re", "0664-990011", 3200);
+    const cashiers = [c1, c2];
+    const cat = {};
+    [["cafe", "Caf\xE9", "\u0642\u0647\u0648\u0629", "\u2615"], ["drinks", "Boissons", "\u0645\u0634\u0631\u0648\u0628\u0627\u062A", "\u{1F964}"], ["pastry", "P\xE2tisserie", "\u062D\u0644\u0648\u064A\u0627\u062A", "\u{1F950}"], ["restaurant", "Restaurant", "\u0645\u0637\u0639\u0645", "\u{1F37D}\uFE0F"], ["sandwiches", "Sandwiches", "\u0633\u0646\u062F\u0648\u064A\u062A\u0634\u0627\u062A", "\u{1F96A}"], ["other", "Autre", "\u0623\u062E\u0631\u0649", "\u2728"]].forEach(([k, fr, ar, ic], i) => cat[k] = insert("categories", { name_fr: fr, name_ar: ar, icon: ic, sort_order: i, active: 1 }).id);
+    const sup = {
+      cafe: insert("suppliers", { company_name: "Caf\xE9 Atlas Torr\xE9faction", contact_person: "Rachid Berrada", phone: "0535-624411", email: "contact@cafeatlas.ma", address: "Zone Industrielle Sidi Brahim, F\xE8s", active: 1 }).id,
+      lait: insert("suppliers", { company_name: "Coop\xE9rative Laiti\xE8re Sa\xEFss", contact_person: "Fatima Zahra El Fassi", phone: "0535-731122", email: "commandes@saiss-lait.ma", address: "Route de Mekn\xE8s, F\xE8s", active: 1 }).id,
+      gros: insert("suppliers", { company_name: "Grossiste Al Amal", contact_person: "Hassan Chraibi", phone: "0661-208090", email: "alamal.gros@gmail.com", address: "March\xE9 de gros, F\xE8s", active: 1 }).id
+    };
+    const ing = {}, initial = [];
+    [
+      ["cafe", "Caf\xE9 en grains", "g", 2e3, 0.19, "cafe", 12e3],
+      ["lait", "Lait frais", "ml", 1e4, 85e-4, "lait", 9e4],
+      ["sucre", "Sucre (portion)", "piece", 200, 0.3, "gros", 3e3],
+      ["orange", "Oranges", "piece", 40, 1.8, "gros", 600],
+      ["the", "Th\xE9 vert", "g", 500, 0.075, "gros", 4e3],
+      ["menthe", "Menthe fra\xEEche", "g", 300, 0.035, "gros", 3500],
+      ["farine", "Farine", "g", 1e4, 85e-4, "gros", 8e4],
+      ["beurre", "Beurre", "g", 3e3, 0.085, "lait", 25e3],
+      ["poulet", "Poulet cuit", "g", 3e3, 0.07, "gros", 2e4],
+      ["pain", "Pain sandwich", "piece", 30, 1.2, "gros", 450],
+      ["fromage", "Fromage", "g", 2e3, 0.09, "lait", 15e3],
+      ["oeuf", "\u0152ufs", "piece", 60, 1.3, "gros", 900]
+    ].forEach(([k, name, unit, min, cost, sp, q]) => {
+      ing[k] = insert("ingredients", { name, unit, current_quantity: 0, min_stock: min, avg_cost: cost, supplier_id: sup[sp], active: 1 }).id;
+      initial.push([k, q, cost, sp]);
+    });
+    const start = addDays(today(), -14);
+    let inv = 1e3;
+    const bySup = {};
+    initial.forEach(([k, q, c, sp]) => (bySup[sp] || (bySup[sp] = [])).push([k, q, c]));
+    const restock = (date, f) => Object.entries(bySup).forEach(([sp, items]) => {
+      const no = `FA-${inv++}`, total = sum(items, ([, q, c]) => q * f * c);
+      const p = insert("purchases", { supplier_id: sup[sp], purchase_date: date, invoice_number: no, payment_status: "paid", amount_paid: total, total, user_id: manager, created_at: date + " 08:00:00" });
+      items.forEach(([k, q, c]) => {
+        insert("purchase_items", { purchase_id: p.id, ingredient_id: ing[k], quantity: q * f, unit_cost: c, total: q * f * c });
+        applyStockMovement({ ingredientId: ing[k], quantity: q * f, type: "purchase", userId: manager, reference: no, unitCost: c, at: date + " 08:00:00" });
+      });
+    });
+    restock(start, 1);
+    {
+      const d = addDays(today(), -3), q = 6e3, c = 0.19, no = `FA-${inv++}`;
+      const p = insert("purchases", { supplier_id: sup.cafe, purchase_date: d, invoice_number: no, payment_status: "unpaid", amount_paid: 0, total: q * c, user_id: manager, created_at: d + " 09:00:00" });
+      insert("purchase_items", { purchase_id: p.id, ingredient_id: ing.cafe, quantity: q, unit_cost: c, total: q * c });
+      applyStockMovement({ ingredientId: ing.cafe, quantity: q, type: "purchase", userId: manager, reference: no, unitCost: c, at: d + " 09:00:00" });
+    }
+    const defs = [
+      ["cafe_noir", "Caf\xE9 Noir", "cafe", 15, "\u2615", { cafe: 8, sucre: 1 }, 5],
+      ["cappuccino", "Cappuccino", "cafe", 25, "\u2615", { cafe: 10, lait: 200, sucre: 1 }, 5],
+      ["cafe_lait", "Caf\xE9 au Lait", "cafe", 20, "\u{1F95B}", { cafe: 8, lait: 150, sucre: 1 }, 4],
+      ["jus", "Jus d'Orange", "drinks", 30, "\u{1F34A}", { orange: 3 }, 3],
+      ["croissant", "Croissant", "pastry", 12, "\u{1F950}", { farine: 45, beurre: 25, sucre: 1 }, 4],
+      ["the", "Th\xE9 Marocain", "drinks", 15, "\u{1F375}", { the: 5, menthe: 10, sucre: 2 }, 4],
+      ["msemen", "Msemen & Miel", "restaurant", 18, "\u{1FAD3}", { farine: 80, beurre: 15 }, 2],
+      ["omelette", "Omelette Fromage", "restaurant", 35, "\u{1F373}", { oeuf: 3, fromage: 30, beurre: 8 }, 1],
+      ["sandwich", "Sandwich Poulet", "sandwiches", 30, "\u{1F96A}", { pain: 1, poulet: 90, fromage: 20 }, 2],
+      ["chocolatine", "Pain au Chocolat", "pastry", 14, "\u{1F36B}", { farine: 45, beurre: 25, sucre: 2 }, 2]
+    ];
+    const weighted = [];
+    defs.forEach(([, name, c, price, img, rec, w]) => {
+      const p = insert("products", { name, category_id: cat[c], price, image: img, active: 1, created_at: now() });
+      const r = insert("recipes", { product_id: p.id, notes: null });
+      Object.entries(rec).forEach(([ik, q]) => insert("recipe_items", { recipe_id: r.id, ingredient_id: ing[ik], quantity: q }));
+      const P = { id: p.id, name, price, rec };
+      for (let n = 0; n < w; n++) weighted.push(P);
+    });
+    const todayStr = today(), nowTime = now().slice(11, 19), nowHour = Number(nowTime.slice(0, 2));
+    let seq = 0;
+    for (let off = -14; off <= 0; off++) {
+      const date = addDays(todayStr, off), isToday = off === 0;
+      if ([-10, -6, -2].includes(off)) restock(date, 0.6);
+      const cu = pick(cashiers), opening = 500;
+      const cr = insert("cash_registers", { business_date: date, opening_cash: opening, opened_by: cu, status: isToday ? "open" : "closed", opened_at: date + " 07:30:00" });
+      let cashSales = 0, cashExp = 0, cashWd = 0, totalSales = 0;
+      const n = isToday ? Math.floor(nowHour * 2.2) : between(28, 48), pad = (x) => String(x).padStart(2, "0");
+      const times = Array.from({ length: n }, () => `${pad(between(8, 22))}:${pad(between(0, 59))}:${pad(between(0, 59))}`).filter((t) => !isToday || t <= nowTime).sort();
+      for (const t of times) {
+        const lines = {};
+        for (let k = between(1, 4); k > 0; k--) {
+          const p = pick(weighted);
+          lines[_a = p.id] || (lines[_a] = { p, q: 0 });
+          lines[p.id].q += between(1, 2);
+        }
+        const arr = Object.values(lines), sub = sum(arr, (l) => l.p.price * l.q), cost = sum(arr, (l) => productCost(l.p.id) * l.q), ts = `${date} ${t}`;
+        const no = `LS-${date.replace(/-/g, "")}-${pad4(++seq)}`, cashier = pick(cashiers);
+        const sale = insert("sales", { sale_number: no, user_id: cashier, cash_register_id: cr.id, subtotal: sub, tax: 0, total: sub, total_cost: cost, status: "completed", created_at: ts });
+        arr.forEach((l) => {
+          insert("sale_items", { sale_id: sale.id, product_id: l.p.id, product_name: l.p.name, quantity: l.q, unit_price: l.p.price, unit_cost: productCost(l.p.id), total: l.p.price * l.q });
+          Object.entries(l.p.rec).forEach(([ik, q]) => applyStockMovement({ ingredientId: ing[ik], quantity: -q * l.q, type: "sale", userId: cashier, reference: no, at: ts }));
+        });
+        const r = rand(), method = r < 0.55 ? "cash" : r < 0.85 ? "card" : "mobile";
+        insert("payments", { sale_id: sale.id, method, amount: sub });
+        if (method === "cash") {
+          insert("cash_transactions", { cash_register_id: cr.id, type: "sale", amount: sub, reference: no, note: null, user_id: cashier, created_at: ts });
+          cashSales += sub;
+        }
+        totalSales += sub;
+      }
+      const dayExp = [];
+      if (date.endsWith("-01") || off === -14) dayExp.push(["rent", 6e3, "Loyer mensuel du local", "transfer"]);
+      if (off === -10) dayExp.push(["electricity", 1180.5, "Facture \xE9lectricit\xE9", "transfer"]);
+      if (off === -9) dayExp.push(["water", 420, "Facture d'eau", "transfer"]);
+      if (off === -7) dayExp.push(["salaries", 11900, "Salaires de la semaine (\xE9quipe)", "transfer"]);
+      if (off === -6) dayExp.push(["maintenance", 350, "Entretien machine \xE0 caf\xE9", "cash"]);
+      if (off === -4) dayExp.push(["marketing", 600, "Impression flyers & Instagram", "card"]);
+      if (off === -2) dayExp.push(["transport", 120, "Livraison march\xE9 de gros", "cash"]);
+      if (off % 3 === 0 && off !== 0) dayExp.push(["other", between(40, 150), "Produits de nettoyage", "cash"]);
+      dayExp.forEach(([c, a, d, m]) => {
+        insert("expenses", { category: c, amount: a, expense_date: date, description: d, payment_method: m, receipt_path: null, user_id: manager, created_at: date + " 11:00:00" });
+        if (m === "cash") {
+          insert("cash_transactions", { cash_register_id: cr.id, type: "expense", amount: a, reference: c, note: d, user_id: manager, created_at: date + " 11:00:00" });
+          cashExp += a;
+        }
+      });
+      if (!isToday && off % 4 === 0) {
+        cashWd += 1e3;
+        insert("cash_transactions", { cash_register_id: cr.id, type: "withdrawal", amount: 1e3, reference: null, note: "Retrait propri\xE9taire", user_id: admin, created_at: date + " 20:00:00" });
+      }
+      if (!isToday) {
+        const exp = opening + cashSales - cashExp - cashWd, act = exp + pick([0, 0, 0, -5, 5, -10, 0, 2]);
+        insert("daily_closures", { cash_register_id: cr.id, business_date: date, expected_cash: exp, actual_cash: act, difference: act - exp, total_sales: totalSales, notes: null, closed_by: cu, closed_at: date + " 23:30:00" });
+      }
+    }
+    const setTo = (k, target, type, note) => {
+      const cur = DB.ingredients.find((i) => i.id === ing[k]).current_quantity;
+      applyStockMovement({ ingredientId: ing[k], quantity: target - cur, type, userId: manager, reference: "INV-" + todayStr, note });
+    };
+    [["lait", 7800], ["menthe", 240, "waste"], ["oeuf", 42], ["cafe", 11500], ["farine", 26e3], ["beurre", 9e3], ["poulet", 12e3], ["fromage", 6500], ["the", 2200], ["sucre", 1400], ["orange", 180], ["pain", 160]].forEach(([k, v, ty]) => setTo(k, v, ty || "adjustment", ty === "waste" ? "Menthe fan\xE9e jet\xE9e" : "Inventaire physique"));
+    save();
+  }
+  const pad4 = (n) => String(n).padStart(4, "0");
+  async function init() {
+    try {
+      DB = JSON.parse(store.getItem(KEY) || "null");
+    } catch {
+      DB = null;
+    }
+    if (!DB || !DB.users) await seed();
+  }
+  const PERMS = {
+    admin: ["dashboard", "pos", "sales", "products", "categories", "recipes", "inventory", "purchases", "suppliers", "expenses", "cash", "employees", "reports", "settings"],
+    manager: ["dashboard", "pos", "sales", "products", "categories", "recipes", "inventory", "purchases", "suppliers", "expenses", "cash", "reports"],
+    cashier: ["pos", "sales", "cash"]
+  };
+  const session = () => {
+    try {
+      const s = JSON.parse(store.getItem(SESSION) || "null");
+      if (s && s.exp > Date.now()) {
+        const u = DB.users.find((x) => x.id === s.uid && x.active);
+        return u ? { id: u.id, name: u.name, email: u.email, role: u.role, language: u.language } : null;
+      }
+    } catch {
+    }
+    return null;
+  };
+  const need = (user, ...secs) => {
+    if (!user) throw err(401, "AUTH_REQUIRED");
+    if (!secs.some((s) => PERMS[user.role].includes(s))) throw err(403, "FORBIDDEN");
+  };
+  const pubSettings = () => ({
+    business_name: setting("business_name"),
+    city: setting("city"),
+    currency_label: setting("currency_label", "DH"),
+    default_language: setting("default_language", "fr"),
+    tax_enabled: setting("tax_enabled", "0") === "1",
+    tax_rate: num(setting("tax_rate", "0")),
+    logo: setting("logo") || null,
+    allow_negative_stock: setting("allow_negative_stock", "0") === "1"
+  });
+  const toDataUrl = (file) => new Promise((res, rej) => {
+    if (!/^image\//.test(file.type)) return rej(err(400, "BAD_REQUEST", "Image invalide"));
+    const fr = new FileReader();
+    fr.onerror = () => rej(err(400, "BAD_REQUEST"));
+    fr.onload = () => {
+      const im = new Image();
+      im.onerror = () => rej(err(400, "BAD_REQUEST", "Image invalide"));
+      im.onload = () => {
+        const k = Math.min(1, 320 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * k);
+        c.height = Math.round(im.height * k);
+        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+        res(c.toDataURL("image/jpeg", 0.82));
+      };
+      im.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+  const productRow = (p) => {
+    const c = DB.categories.find((x) => x.id === p.category_id) || {}, cost = productCost(p.id), lines = recipeOf(p.id).length;
+    return { ...p, category_fr: c.name_fr, category_ar: c.name_ar, cost, recipe_lines: lines, margin: p.price > 0 ? (p.price - cost) / p.price * 100 : 0, profit: p.price - cost };
+  };
+  const like = (s, q) => String(s).toLowerCase().includes(String(q || "").trim().toLowerCase());
+  async function handle(method, url, body) {
+    if (!DB) await init();
+    const [path, qs = ""] = url.split("?");
+    const Q = Object.fromEntries(new URLSearchParams(qs));
+    const user = session();
+    const m = (re) => path.match(re);
+    if (path === "/api/login" && method === "POST") {
+      const email = String(body.email || "").trim().toLowerCase(), u = DB.users.find((x) => x.email === email && x.active);
+      if (!u || u.password_hash !== await hash(String(body.password || ""))) throw err(401, "INVALID_CREDENTIALS");
+      store.setItem(SESSION, JSON.stringify({ uid: u.id, exp: Date.now() + 12 * 3600 * 1e3 }));
+      return { user: { id: u.id, name: u.name, email: u.email, role: u.role, language: u.language }, permissions: PERMS[u.role] };
+    }
+    if (path === "/api/logout") {
+      store.removeItem(SESSION);
+      return { ok: true };
+    }
+    if (path === "/api/me" && method === "GET") {
+      if (!user) throw err(401, "AUTH_REQUIRED");
+      return { user, permissions: PERMS[user.role], settings: pubSettings() };
+    }
+    if (path === "/api/me/language") {
+      need(user, ...PERMS[(user == null ? void 0 : user.role) || "cashier"]);
+      DB.users.find((u) => u.id === user.id).language = String(body.language || "fr");
+      save();
+      return { ok: true };
+    }
+    if (path === "/api/dashboard") {
+      need(user, "dashboard");
+      const d = today(), done = DB.sales.filter((s) => s.status === "completed"), day = done.filter((s) => s.created_at.slice(0, 10) === d);
+      const revenue = sum(day, (s) => s.total), cogs = sum(day, (s) => s.total_cost), expenses = sum(DB.expenses.filter((e) => e.expense_date === d), (e) => e.amount), from = addDays(d, -6);
+      const last7 = Array.from({ length: 7 }, (_, i) => {
+        const x = addDays(from, i), r = done.filter((s) => s.created_at.slice(0, 10) === x);
+        return { date: x, revenue: sum(r, (s) => s.total), sales: r.length };
+      });
+      const ids = new Set(done.filter((s) => s.created_at.slice(0, 10) >= from).map((s) => s.id)), agg = {};
+      DB.sale_items.filter((i) => ids.has(i.sale_id)).forEach((i) => {
+        var _a;
+        const a = agg[_a = i.product_id] || (agg[_a] = { name: i.product_name, qty: 0, revenue: 0 });
+        a.qty += i.quantity;
+        a.revenue += i.total;
+      });
+      const dayIds = new Set(day.map((s) => s.id)), pm = {};
+      DB.payments.filter((p) => dayIds.has(p.sale_id)).forEach((p) => {
+        var _a;
+        const a = pm[_a = p.method] || (pm[_a] = { method: p.method, amount: 0, n: 0 });
+        a.amount += p.amount;
+        a.n++;
+      });
+      const lowStock = DB.ingredients.filter((i) => i.active && i.current_quantity <= i.min_stock).sort((a, b) => a.current_quantity / (a.min_stock || 1) - b.current_quantity / (b.min_stock || 1)).slice(0, 10);
+      const recent = [...done].sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id).slice(0, 8).map((s) => {
+        var _a;
+        return { id: s.id, sale_number: s.sale_number, total: s.total, created_at: s.created_at, cashier: (_a = DB.users.find((u) => u.id === s.user_id)) == null ? void 0 : _a.name, methods: DB.payments.filter((p) => p.sale_id === s.id).map((p) => p.method).join(",") };
+      });
+      return { date: d, revenue, sales_count: day.length, expenses, cogs, net_profit: revenue - cogs - expenses, last7, top: Object.values(agg).sort((a, b) => b.qty - a.qty).slice(0, 5), payments: Object.values(pm), lowStock, recent };
+    }
+    if (path === "/api/categories") {
+      if (method === "GET") {
+        need(user, ...PERMS[(user == null ? void 0 : user.role) || "cashier"]);
+        return [...DB.categories].sort((a, b) => a.sort_order - b.sort_order || a.id - b.id).map((c) => ({ ...c, product_count: DB.products.filter((p) => p.category_id === c.id).length }));
+      }
+      need(user, "categories");
+      if (!String(body.name_fr || "").trim()) throw err(400, "BAD_REQUEST", "name required");
+      const r = insert("categories", { name_fr: body.name_fr.trim(), name_ar: body.name_ar || null, icon: body.icon || null, sort_order: Math.max(0, ...DB.categories.map((c) => c.sort_order)) + 1, active: 1 });
+      save();
+      return { id: r.id };
+    }
+    let mm;
+    if (mm = m(/^\/api\/categories\/(\d+)$/)) {
+      need(user, "categories");
+      const id = +mm[1], c = DB.categories.find((x) => x.id === id);
+      if (!c) throw err(400, "BAD_REQUEST", "Not found");
+      if (method === "PUT") {
+        Object.assign(c, { name_fr: String(body.name_fr || "").trim(), name_ar: body.name_ar || null, icon: body.icon || null, active: body.active === 0 || body.active === false ? 0 : 1 });
+        save();
+        return { ok: true };
+      }
+      if (method === "DELETE") {
+        if (DB.products.some((p) => p.category_id === id)) throw err(409, "CATEGORY_NOT_EMPTY");
+        DB.categories = DB.categories.filter((x) => x.id !== id);
+        save();
+        return { ok: true };
+      }
+    }
+    if (path === "/api/products") {
+      if (method === "GET") {
+        need(user, ...PERMS[(user == null ? void 0 : user.role) || "cashier"]);
+        let rows = DB.products.filter((p) => like(p.name, Q.q) && (!Q.category || p.category_id == Q.category) && (user.role !== "cashier" && Q.active !== "1" || p.active));
+        rows = rows.sort((a, b) => a.name.localeCompare(b.name)).map(productRow);
+        return user.role === "cashier" ? rows.map(({ cost, margin, profit, ...r2 }) => r2) : rows;
+      }
+      need(user, "products");
+      const name = String(body.name || "").trim();
+      if (!name || num(body.price, -1) < 0 || !body.category_id) throw err(400, "BAD_REQUEST", "name, category and price required");
+      const r = insert("products", { name, category_id: +body.category_id, price: num(body.price), image: body.image || null, active: body.active === 0 ? 0 : 1, created_at: now() });
+      save();
+      return { id: r.id };
+    }
+    if (mm = m(/^\/api\/products\/(\d+)$/)) {
+      need(user, "products");
+      const id = +mm[1], p = DB.products.find((x) => x.id === id);
+      if (!p) throw err(400, "BAD_REQUEST", "Not found");
+      if (method === "PUT") {
+        const name = String(body.name || "").trim();
+        if (!name || num(body.price, -1) < 0 || !body.category_id) throw err(400, "BAD_REQUEST", "name, category and price required");
+        Object.assign(p, { name, category_id: +body.category_id, price: num(body.price), image: body.image || null, active: body.active === 0 || body.active === false ? 0 : 1 });
+        save();
+        return { ok: true };
+      }
+      if (method === "DELETE") {
+        if (DB.sale_items.some((i) => i.product_id === id)) {
+          p.active = 0;
+          save();
+          return { ok: true, deactivated: true };
+        }
+        const r = DB.recipes.find((x) => x.product_id === id);
+        if (r) {
+          DB.recipe_items = DB.recipe_items.filter((i) => i.recipe_id !== r.id);
+          DB.recipes = DB.recipes.filter((x) => x.id !== r.id);
+        }
+        DB.products = DB.products.filter((x) => x.id !== id);
+        save();
+        return { ok: true, deleted: true };
+      }
+    }
+    if (path === "/api/upload") {
+      need(user, "products", "settings", "expenses");
+      const f = body.get("file");
+      if (!f) throw err(400, "BAD_REQUEST", "Invalid file");
+      return { path: await toDataUrl(f) };
+    }
+    if (path === "/api/ingredients") {
+      if (method === "GET") {
+        need(user, "inventory", "recipes", "purchases");
+        return DB.ingredients.filter((i) => like(i.name, Q.q)).sort((a, b) => a.name.localeCompare(b.name)).map((i) => {
+          var _a;
+          return { ...i, supplier: ((_a = DB.suppliers.find((s) => s.id === i.supplier_id)) == null ? void 0 : _a.company_name) || null, low: i.current_quantity <= i.min_stock ? 1 : 0, stock_value: i.current_quantity * i.avg_cost };
+        });
+      }
+      need(user, "inventory");
+      if (!String(body.name || "").trim() || !UNITS.includes(body.unit)) throw err(400, "BAD_REQUEST", "name and valid unit required");
+      const r = insert("ingredients", { name: body.name.trim(), unit: body.unit, current_quantity: 0, min_stock: num(body.min_stock), avg_cost: num(body.avg_cost), supplier_id: body.supplier_id ? +body.supplier_id : null, active: 1 });
+      if (num(body.initial_quantity) > 0) applyStockMovement({ ingredientId: r.id, quantity: num(body.initial_quantity), type: "adjustment", userId: user.id, reference: "INITIAL", note: "Stock initial" });
+      save();
+      return { id: r.id };
+    }
+    if ((mm = m(/^\/api\/ingredients\/(\d+)$/)) && method === "PUT") {
+      need(user, "inventory");
+      const i = DB.ingredients.find((x) => x.id === +mm[1]);
+      if (!i || !String(body.name || "").trim() || !UNITS.includes(body.unit)) throw err(400, "BAD_REQUEST", "name and valid unit required");
+      Object.assign(i, { name: body.name.trim(), unit: body.unit, min_stock: num(body.min_stock), avg_cost: num(body.avg_cost), supplier_id: body.supplier_id ? +body.supplier_id : null, active: body.active === 0 || body.active === false ? 0 : 1 });
+      save();
+      return { ok: true };
+    }
+    if (mm = m(/^\/api\/ingredients\/(\d+)\/movement$/)) {
+      need(user, "inventory");
+      const { type, mode, note } = body, q = num(body.quantity);
+      if (!["adjustment", "waste", "return"].includes(type)) throw err(400, "BAD_REQUEST", "Invalid movement type");
+      if (q === 0 && mode !== "set") throw err(400, "BAD_REQUEST", "Quantity required");
+      const ing = DB.ingredients.find((x) => x.id === +mm[1]);
+      if (!ing) throw err(400, "BAD_REQUEST", "Ingredient not found");
+      const delta = type === "adjustment" ? mode === "set" ? q - ing.current_quantity : q : -Math.abs(q);
+      if (delta === 0) throw err(400, "BAD_REQUEST", "No change");
+      const negOK = user.role === "admin" && setting("allow_negative_stock", "0") === "1";
+      const cq = applyStockMovement({ ingredientId: ing.id, quantity: delta, type, userId: user.id, reference: "MANUAL", note: note || null, allowNegative: negOK });
+      save();
+      return { ok: true, current_quantity: cq };
+    }
+    if (path === "/api/stock-movements") {
+      need(user, "inventory", "reports");
+      const lim = Math.min(num(Q.limit, 100), 500);
+      return DB.stock_movements.filter((x) => (!Q.ingredient || x.ingredient_id == Q.ingredient) && (!Q.type || x.movement_type === Q.type)).sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id).slice(0, lim).map((x) => {
+        var _a;
+        const i = DB.ingredients.find((k) => k.id === x.ingredient_id);
+        return { ...x, ingredient: i == null ? void 0 : i.name, unit: i == null ? void 0 : i.unit, user: (_a = DB.users.find((u) => u.id === x.user_id)) == null ? void 0 : _a.name };
+      });
+    }
+    if (path === "/api/suppliers") {
+      need(user, "inventory", "purchases", "suppliers");
+      return DB.suppliers.filter((s) => s.active).sort((a, b) => a.company_name.localeCompare(b.company_name)).map((s) => ({ id: s.id, company_name: s.company_name }));
+    }
+    if (path === "/api/settings") {
+      need(user, "settings");
+      if (method === "GET") return pubSettings();
+      const b = body, set = (k, v) => DB.settings[k] = String(v);
+      if (b.business_name !== void 0) set("business_name", String(b.business_name).trim());
+      if (b.city !== void 0) set("city", String(b.city).trim());
+      if (b.default_language !== void 0) set("default_language", ["fr", "ar"].includes(b.default_language) ? b.default_language : "fr");
+      if (b.tax_enabled !== void 0) set("tax_enabled", b.tax_enabled ? "1" : "0");
+      if (b.tax_rate !== void 0) set("tax_rate", Math.max(0, Math.min(100, num(b.tax_rate))));
+      if (b.logo !== void 0) set("logo", b.logo || "");
+      if (b.allow_negative_stock !== void 0) set("allow_negative_stock", b.allow_negative_stock ? "1" : "0");
+      save();
+      return pubSettings();
+    }
+    if (path === "/api/backup/export") {
+      need(user, "settings");
+      return JSON.parse(JSON.stringify(DB));
+    }
+    if (path === "/api/backup/import") {
+      need(user, "settings");
+      if (!body || !body.users || !body.settings || !body.ingredients) throw err(400, "BAD_REQUEST", "Fichier de sauvegarde invalide");
+      DB = body;
+      save();
+      return { ok: true };
+    }
+    if (path === "/api/backup/reset") {
+      need(user, "settings");
+      await seed();
+      store.removeItem(SESSION);
+      return { ok: true };
+    }
+    throw err(404, "NOT_FOUND");
+  }
+  const UNITS = ["kg", "g", "l", "ml", "piece", "box"];
+  return { init, handle };
+})();
+</script>
+<script>const $root = document.getElementById("root");
+const S = { me: null, perms: [], settings: {}, cats: [], suppliers: [] };
+const NAV = [
+  { id: "dashboard", ic: "\u{1F4CA}" },
+  { id: "pos", ic: "\u{1F9FE}", phase: 2 },
+  { id: "sales", ic: "\u{1F9EE}", phase: 2 },
+  { id: "products", ic: "\u{1F950}" },
+  { id: "categories", ic: "\u{1F3F7}\uFE0F" },
+  { id: "recipes", ic: "\u{1F4D6}", phase: 3 },
+  { id: "inventory", ic: "\u{1F4E6}" },
+  { id: "purchases", ic: "\u{1F6D2}", phase: 4 },
+  { id: "suppliers", ic: "\u{1F69A}", phase: 4 },
+  { id: "expenses", ic: "\u{1F4B8}", phase: 4 },
+  { id: "cash", ic: "\u{1F4B0}", phase: 2 },
+  { id: "employees", ic: "\u{1F465}", phase: 5 },
+  { id: "reports", ic: "\u{1F4C8}", phase: 5 },
+  { id: "settings", ic: "\u2699\uFE0F" }
+];
+const NAV_KEY = { dashboard: "nav_dashboard", pos: "nav_pos", sales: "nav_sales", products: "nav_products", categories: "nav_categories", recipes: "nav_recipes", inventory: "nav_inventory", purchases: "nav_purchases", suppliers: "nav_suppliers", expenses: "nav_expenses", cash: "nav_cash", employees: "nav_employees", reports: "nav_reports", settings: "nav_settings" };
+const esc = (s) => String(s != null ? s : "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const $ = (sel, el = document) => el.querySelector(sel);
+const $$ = (sel, el = document) => [...el.querySelectorAll(sel)];
+const DH = () => S.settings.currency_label || "DH";
+const M = (n) => "\u2066" + money(n, DH()) + "\u2069";
+const catName = (c) => currentLang === "ar" && (c.name_ar || c.category_ar) ? c.name_ar || c.category_ar : c.name_fr || c.category_fr;
+const isImg = (s) => /^(\/uploads\/|data:image\/)/.test(s || "");
+const thumb = (img) => `<div class="thumb">${isImg(img) ? `<img src="${esc(img)}" alt="" loading="lazy">` : esc(img || "\u{1F37D}\uFE0F")}</div>`;
+const debounce = (fn, ms = 250) => {
+  let id;
+  return (...a) => {
+    clearTimeout(id);
+    id = setTimeout(() => fn(...a), ms);
+  };
+};
+async function api(method, url, body) {
+  try {
+    return await LocalAPI.handle(method, url, body);
+  } catch (e) {
+    if (e && e.status) {
+      if (e.status === 401 && S.me && url !== "/api/login") {
+        S.me = null;
+        renderLogin();
+      }
+      throw e;
+    }
+    console.error(e);
+    throw { error: "generic", detail: String(e && e.message || e) };
+  }
+}
+function errMsg(e) {
+  const k = "err_" + (e.error || "generic");
+  const m = t(k) === k ? t("err_generic") : t(k);
+  return e.error === "INSUFFICIENT_STOCK" ? `${m} ${e.detail || ""}` : e.error === "BAD_REQUEST" && e.detail ? `${t("err_generic")} ${e.detail}` : m;
+}
+function toast(msg, isErr = false) {
+  const el = document.createElement("div");
+  el.className = "toast" + (isErr ? " err" : "");
+  el.setAttribute("role", "status");
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+function openModal(html, mount) {
+  const ov = document.createElement("div");
+  ov.className = "overlay";
+  ov.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
+  const close = () => {
+    ov.remove();
+    document.removeEventListener("keydown", onKey);
+  };
+  const onKey = (e) => {
+    if (e.key === "Escape") close();
+  };
+  ov.addEventListener("mousedown", (e) => {
+    if (e.target === ov) close();
+  });
+  document.addEventListener("keydown", onKey);
+  document.body.appendChild(ov);
+  $$("[data-close]", ov).forEach((b) => b.onclick = close);
+  mount && mount(ov, close);
+  const first = $("input:not([type=hidden]):not([type=file]),select", ov);
+  first && first.focus();
+  return close;
+}
+function confirmBox(msg) {
+  return new Promise((resolve) => {
+    openModal(
+      `<h2>${esc(t("confirm_delete"))}</h2><p>${esc(msg)}</p>
+      <div class="modal-foot"><button class="btn ghost" data-close>${t("cancel")}</button><button class="btn danger" id="cf-yes">${t("delete")}</button></div>`,
+      (ov, close) => {
+        $("#cf-yes", ov).onclick = () => {
+          close();
+          resolve(true);
+        };
+        $$("[data-close]", ov).forEach((b) => b.addEventListener("click", () => resolve(false)));
+      }
+    );
+  });
+}
+const roleLabel = (r) => t("role_" + r);
+function renderLogin() {
+  $root.innerHTML = `
+  <div class="login">
+    <div class="login-art">
+      <div class="logo-mark"><div class="logo-six">6</div><div><b style="font-family:var(--font-display);font-size:22px">Le Six</b><div style="color:#cdbca3;font-size:13px">F\xE8s \xB7 Maroc</div></div></div>
+      <div><h1>${esc(t("app_name"))}</h1><p style="margin-top:14px">${esc(t("tagline"))}</p></div>
+      <div style="color:#9c8a72;font-size:13px">Caf\xE9 \xB7 Restaurant \xB7 P\xE2tisserie</div>
+    </div>
+    <div class="login-form-wrap"><div class="login-card">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:18px">${langSwitch()}</div>
+      <h2>${t("login_title")}</h2><div class="muted">${t("login_sub")}</div>
+      <div id="lf">
+        <div class="field"><label for="em">${t("email")}</label><input id="em" class="input" type="email" inputmode="email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required dir="ltr"></div>
+        <div class="field"><label for="pw">${t("password")}</label><input id="pw" class="input" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" required dir="ltr"><label class="switch" style="min-height:36px"><input id="showpw" type="checkbox"> ${t("show_pw")}</label></div>
+        <div id="le" class="error-msg hidden" role="alert"></div>
+        <button class="btn primary block" id="lb" type="button">${t("sign_in")}</button>
+      </div>
+      <div class="demo"><div style="font-weight:600;margin-bottom:4px">${t("demo_accounts")} <span style="font-weight:400;opacity:.6">\xB7 v6</span></div>
+        <button type="button" data-demo="admin@lesix.ma|admin123">${roleLabel("admin")} \u2014 admin@lesix.ma</button>
+        <button type="button" data-demo="manager@lesix.ma|manager123">${roleLabel("manager")} \u2014 manager@lesix.ma</button>
+        <button type="button" data-demo="caissier@lesix.ma|cashier123">${roleLabel("cashier")} \u2014 caissier@lesix.ma</button>
+      </div>
+    </div></div>
+  </div>`;
+  bindLang(renderLogin);
+  $("#showpw").onchange = (e) => {
+    $("#pw").type = e.target.checked ? "text" : "password";
+  };
+  $$("[data-demo]").forEach((b) => b.onclick = () => {
+    const [e, p] = b.dataset.demo.split("|");
+    $("#em").value = e;
+    $("#pw").value = p;
+  });
+  const doLogin = async (ev) => {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    const btn = $("#lb"), box = $("#le");
+    box.classList.add("hidden");
+    btn.disabled = true;
+    btn.textContent = t("signing_in");
+    try {
+      const r = await api("POST", "/api/login", { email: $("#em").value, password: $("#pw").value });
+      S.me = r.user;
+      S.perms = r.permissions;
+      const me = await api("GET", "/api/me");
+      S.settings = me.settings;
+      if (r.user.language && LANGS[r.user.language] && !LS.getItem("lang_chosen")) setLang(r.user.language);
+      location.hash = "#/" + firstRoute();
+      renderShell();
+    } catch (e) {
+      box.textContent = errMsg(e) + (e.error === "generic" && e.detail ? " [" + e.detail + "]" : "");
+      box.classList.remove("hidden");
+      btn.disabled = false;
+      btn.textContent = t("sign_in");
+    }
+  };
+  $("#lb").onclick = doLogin;
+  $$("#em, #pw").forEach((i) => i.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") doLogin(e);
+  }));
+}
+function langSwitch() {
+  return `<div class="lang-switch" role="group" aria-label="Language">${Object.entries(LANGS).map(([k, v]) => `<button type="button" data-lang="${k}" class="${k === currentLang ? "on" : ""}" aria-pressed="${k === currentLang}">${esc(v.meta.short)} <span style="font-weight:500">${esc(v.meta.name)}</span></button>`).join("")}</div>`;
+}
+function bindLang(rerender) {
+  $$("[data-lang]").forEach((b) => b.onclick = async () => {
+    setLang(b.dataset.lang);
+    LS.setItem("lang_chosen", "1");
+    if (S.me) api("POST", "/api/me/language", { language: b.dataset.lang }).catch(() => {
+    });
+    rerender();
+  });
+}
+const firstRoute = () => (NAV.find((n) => S.perms.includes(n.id)) || { id: "dashboard" }).id;
+const routeId = () => (location.hash.replace(/^#\//, "") || "").split("?")[0];
+function navLinks(cur) {
+  return NAV.filter((n) => S.perms.includes(n.id)).map((n) => `<a href="#/${n.id}" class="${n.id === cur ? "active" : ""}" ${n.id === cur ? 'aria-current="page"' : ""}><span class="ic" aria-hidden="true">${n.ic}</span><span class="nl">${esc(t(NAV_KEY[n.id]))}</span>${n.phase ? `<span class="soon">${t("soon")}</span>` : ""}</a>`).join("");
+}
+function logoHtml() {
+  return S.settings.logo ? `<div class="logo-six"><img src="${esc(S.settings.logo)}" alt=""></div>` : `<div class="logo-six">6</div>`;
+}
+function renderShell() {
+  if (!S.me) return renderLogin();
+  const cur = routeId();
+  const permitted = NAV.filter((n) => S.perms.includes(n.id));
+  const prio = ["dashboard", "pos", "products", "inventory"];
+  const bottom = permitted.length <= 5 ? permitted : prio.map((id) => permitted.find((n) => n.id === id)).filter(Boolean);
+  const needMore = permitted.length > 5;
+  $root.innerHTML = `
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">${logoHtml()}<div><b>Le Six</b><small>${esc(S.settings.city || "F\xE8s")} \xB7 Caf\xE9 Manager</small></div></div>
+      <nav class="nav" aria-label="Main">${navLinks(cur)}</nav>
+      <div class="side-foot">
+        ${langSwitch()}
+        <div class="me"><div class="avatar">${esc((S.me.name || "?")[0])}</div><div><b>${esc(S.me.name)}</b><small>${esc(roleLabel(S.me.role))}</small></div></div>
+        <button class="btn sm" id="logout">\u238B <span>${t("sign_out")}</span></button>
+      </div>
+    </aside>
+    <div>
+      <div class="topbar-m"><div class="brand">${logoHtml()}<b>Le Six</b></div>${langSwitch()}</div>
+      <main class="main" id="view" tabindex="-1"></main>
+    </div>
+  </div>
+  <nav class="bottom-nav" aria-label="Main">
+    ${bottom.map((n) => `<a href="#/${n.id}" class="${n.id === cur ? "active" : ""}"><span class="ic" aria-hidden="true">${n.ic}</span>${esc(t(NAV_KEY[n.id]))}</a>`).join("")}
+    ${needMore ? `<button id="more"><span class="ic" aria-hidden="true">\u2630</span>${t("nav_more")}</button>` : `<button id="logout-m"><span class="ic" aria-hidden="true">\u238B</span>${t("sign_out")}</button>`}
+  </nav>`;
+  bindLang(() => renderShell());
+  const lo = async () => {
+    await api("POST", "/api/logout").catch(() => {
+    });
+    S.me = null;
+    S.perms = [];
+    location.hash = "";
+    renderLogin();
+  };
+  $("#logout").onclick = lo;
+  const lm = $("#logout-m");
+  if (lm) lm.onclick = lo;
+  const more = $("#more");
+  if (more) more.onclick = () => {
+    const sh = document.createElement("div");
+    sh.className = "sheet";
+    sh.innerHTML = `<div class="sheet-body"><nav class="nav">${navLinks(cur)}</nav><div style="margin-top:14px"><button class="btn block ghost" id="lo2">\u238B ${t("sign_out")}</button></div></div>`;
+    sh.onclick = (e) => {
+      if (e.target === sh || e.target.closest("a")) sh.remove();
+    };
+    document.body.appendChild(sh);
+    $("#lo2", sh).onclick = lo;
+  };
+  renderView();
+}
+async function renderView() {
+  const view = $("#view");
+  if (!view) return;
+  let id = routeId();
+  if (!id || !S.perms.includes(id)) {
+    id = firstRoute();
+    if (routeId() !== id) {
+      history.replaceState(null, "", "#/" + id);
+      return renderShell();
+    }
+  }
+  $$(".nav a, .bottom-nav a").forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#/" + id));
+  view.innerHTML = `<div class="empty">${t("loading")}</div>`;
+  const nav = NAV.find((n) => n.id === id);
+  try {
+    if (nav.phase) return view.innerHTML = comingSoon(nav);
+    await { dashboard: vDashboard, products: vProducts, categories: vCategories, inventory: vInventory, settings: vSettings }[id](view);
+  } catch (e) {
+    view.innerHTML = `<div class="alert">${esc(errMsg(e))}</div>`;
+  }
+}
+function comingSoon(n) {
+  return `<div class="page-head"><h1>${esc(t(NAV_KEY[n.id]))}</h1></div><div class="card coming"><div class="big" aria-hidden="true">${n.ic}</div><h2 style="margin-top:8px">${t("coming_title")}</h2><p class="muted">${t("coming_text", { phase: n.phase })}</p></div>`;
+}
+window.addEventListener("hashchange", () => {
+  if (S.me) {
+    $$(".sheet").forEach((s) => s.remove());
+    renderView();
+  }
+});
+async function vDashboard(view) {
+  const d = await api("GET", "/api/dashboard");
+  const loc = LANGS[currentLang].meta.locale;
+  const dateStr = (/* @__PURE__ */ new Date(d.date + "T12:00:00")).toLocaleDateString(loc, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const maxRev = Math.max(...d.last7.map((x) => x.revenue), 1);
+  const W = 600, H = 230, pad = 28, bw = (W - pad * 2) / 7;
+  const bars = d.last7.map((x, i) => {
+    const h = Math.max(2, x.revenue / maxRev * (H - 70)), cx = pad + i * bw + bw / 2, isToday = x.date === d.date;
+    const wd = (/* @__PURE__ */ new Date(x.date + "T12:00:00")).toLocaleDateString(loc, { weekday: "short" });
+    return `<g><title>${esc(wd)} ${esc(M(x.revenue))} \u2013 ${x.sales}</title>
+      <rect x="${cx - bw * 0.3}" y="${H - 34 - h}" width="${bw * 0.6}" height="${h}" rx="7" fill="${isToday ? "#b5832f" : "#d9c3a0"}"/>
+      <text x="${cx}" y="${H - 40 - h}" text-anchor="middle" class="val">${Math.round(x.revenue)}</text>
+      <text x="${cx}" y="${H - 12}" text-anchor="middle">${esc(wd)}</text></g>`;
+  }).join("");
+  const totalPay = d.payments.reduce((a, p) => a + p.amount, 0) || 1;
+  const payColor = { cash: "#55693a", card: "#b5832f", mobile: "#b4532a" };
+  const topMax = Math.max(...d.top.map((x) => x.qty), 1);
+  view.innerHTML = `
+    <div class="page-head"><div><h1>${t("hello")}, ${esc(S.me.name.split(" ")[0])}</h1><div class="sub">${esc(dateStr)}</div></div></div>
+    <div class="stats">
+      <div class="card stat" style="--c:#55693a"><div class="k">${t("d_revenue")}</div><div class="v num">${M(d.revenue)}</div><div class="s">${t("d_sales_n", { n: d.sales_count })}</div></div>
+      <div class="card stat" style="--c:#b4532a"><div class="k">${t("d_expenses")}</div><div class="v num">${M(d.expenses)}</div><div class="s">&nbsp;</div></div>
+      <div class="card stat" style="--c:#7a6a8c"><div class="k">${t("d_cogs")}</div><div class="v num">${M(d.cogs)}</div><div class="s">&nbsp;</div></div>
+      <div class="card stat profit"><div class="k">${t("d_profit")}</div><div class="v num ${d.net_profit < 0 ? "neg" : ""}">${M(d.net_profit)}</div><div class="s">${t("d_formula")}</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><h3>${t("d_last7")}</h3><svg class="chart" style="direction:ltr" viewBox="0 0 ${W} ${H}" role="img" aria-label="${t("d_last7")}">${bars}</svg></div>
+      <div class="card"><h3>${t("d_top")}</h3>${d.top.length ? d.top.map((x) => `<div class="bar-row"><div class="top"><span>${esc(x.name)}</span><b class="num">${x.qty} <span class="muted" style="font-weight:500">${t("d_units_sold")}</span></b></div><div class="bar-track"><div class="bar-fill" style="width:${x.qty / topMax * 100}%"></div></div></div>`).join("") : `<div class="empty">${t("no_data")}</div>`}</div>
+    </div>
+    <div class="grid-3">
+      <div class="card"><h3>${t("d_payments")}</h3>${d.payments.length ? d.payments.map((p) => `<div class="bar-row"><div class="top"><span>${t("pay_" + p.method)}</span><b class="num">${M(p.amount)}</b></div><div class="bar-track"><div class="bar-fill" style="width:${p.amount / totalPay * 100}%;--c:${payColor[p.method] || "#b5832f"}"></div></div></div>`).join("") : `<div class="empty">${t("no_data")}</div>`}</div>
+      <div class="card"><h3>${t("d_lowstock")} ${d.lowStock.length ? `<span class="badge low">${d.lowStock.length}</span>` : ""}</h3>
+        ${d.lowStock.length ? `<ul class="list">${d.lowStock.map((i) => `<li><div><b>${esc(i.name)}</b><div class="hint">${t("d_min")} ${qty(i.min_stock)} ${esc(t("unit_" + i.unit))}</div></div><span class="badge low">\u26A0 ${qty(i.current_quantity)} ${esc(t("unit_" + i.unit))}</span></li>`).join("")}</ul>` : `<div class="empty">\u2705 ${t("d_all_ok")}</div>`}</div>
+      <div class="card"><h3>${t("d_recent")}</h3>
+        ${d.recent.length ? `<ul class="list">${d.recent.map((s) => `<li><div><b>${esc(s.sale_number)}</b><div class="hint">${fmtDate(s.created_at)} \xB7 ${esc(s.cashier || "")}</div></div><b class="num">${M(s.total)}</b></li>`).join("")}</ul>` : `<div class="empty">${t("no_data")}</div>`}</div>
+    </div>`;
+}
+async function loadCats() {
+  S.cats = await api("GET", "/api/categories");
+  return S.cats;
+}
+async function vCategories(view) {
+  const cats = await loadCats();
+  view.innerHTML = `
+    <div class="page-head"><div><h1>${t("cat_title")}</h1></div><button class="btn primary" id="newc">\uFF0B ${t("cat_new")}</button></div>
+    <div class="cat-grid">${cats.map((c) => `
+      <div class="card cat-card"><div class="ico">${esc(c.icon || "\u{1F3F7}\uFE0F")}</div>
+        <div><div class="nm">${esc(c.name_fr)}</div><div class="ar" dir="rtl">${esc(c.name_ar || "")}</div><div class="hint">${t("cat_products", { n: c.product_count })}</div></div>
+        <div class="row-act"><button class="btn ghost sm" data-e="${c.id}" aria-label="${t("edit")}">\u270E</button><button class="btn danger sm" data-d="${c.id}" aria-label="${t("delete")}">\u{1F5D1}</button></div></div>`).join("")}</div>`;
+  $("#newc").onclick = () => catForm(null);
+  $$("[data-e]").forEach((b) => b.onclick = () => catForm(cats.find((c) => c.id == b.dataset.e)));
+  $$("[data-d]").forEach((b) => b.onclick = async () => {
+    if (!await confirmBox(catName(cats.find((c) => c.id == b.dataset.d)))) return;
+    try {
+      await api("DELETE", "/api/categories/" + b.dataset.d);
+      toast(t("deleted"));
+      renderView();
+    } catch (e) {
+      toast(errMsg(e), true);
+    }
+  });
+  function catForm(c) {
+    openModal(
+      `<h2>${c ? t("cat_edit") : t("cat_new")}</h2>
+      <div class="field"><label for="f1">${t("cat_name_fr")}</label><input id="f1" class="input" value="${esc((c == null ? void 0 : c.name_fr) || "")}"></div>
+      <div class="field"><label for="f2">${t("cat_name_ar")}</label><input id="f2" class="input" dir="rtl" value="${esc((c == null ? void 0 : c.name_ar) || "")}"></div>
+      <div class="field"><label for="f3">${t("cat_icon")}</label><input id="f3" class="input" maxlength="4" value="${esc((c == null ? void 0 : c.icon) || "")}"></div>
+      <div id="fe" class="error-msg hidden"></div>
+      <div class="modal-foot"><button class="btn ghost" data-close>${t("cancel")}</button><button class="btn primary" id="fs">${t("save")}</button></div>`,
+      (ov, close) => $("#fs", ov).onclick = async () => {
+        const body = { name_fr: $("#f1", ov).value, name_ar: $("#f2", ov).value, icon: $("#f3", ov).value, active: c ? c.active : 1 };
+        try {
+          c ? await api("PUT", "/api/categories/" + c.id, body) : await api("POST", "/api/categories", body);
+          close();
+          toast(t("saved"));
+          renderView();
+        } catch (e) {
+          const b = $("#fe", ov);
+          b.textContent = errMsg(e);
+          b.classList.remove("hidden");
+        }
+      }
+    );
+  }
+}
+const pState = { q: "", cat: "" };
+async function vProducts(view) {
+  await loadCats();
+  view.innerHTML = `
+    <div class="page-head"><div><h1>${t("p_title")}</h1><div class="sub" id="pcount"></div></div>
+      <div class="toolbar"><input id="pq" class="input grow" type="search" placeholder="${t("search")}" value="${esc(pState.q)}" aria-label="${t("search")}">
+      <select id="pc" class="select" aria-label="${t("p_category")}"><option value="">${t("all")}</option>${S.cats.map((c) => `<option value="${c.id}" ${pState.cat == c.id ? "selected" : ""}>${esc(catName(c))}</option>`).join("")}</select>
+      <button class="btn primary" id="newp">\uFF0B ${t("p_new")}</button></div></div>
+    <div id="plist"></div>`;
+  $("#newp").onclick = () => productForm(null);
+  const load = async () => {
+    const rows = await api("GET", `/api/products?q=${encodeURIComponent(pState.q)}&category=${pState.cat}`);
+    $("#pcount").textContent = t("p_count", { n: rows.length });
+    $("#plist").innerHTML = rows.length ? `<div class="table-wrap"><table><thead><tr><th>${t("p_title")}</th><th>${t("p_category")}</th><th class="r">${t("p_price").replace(" (DH)", "")}</th><th class="r">${t("p_cost")}</th><th class="r">${t("p_margin")}</th><th>${t("status")}</th><th></th></tr></thead><tbody>
+      ${rows.map((p) => `<tr>
+        <td class="first"><div class="prod-cell">${thumb(p.image)}<span>${esc(p.name)}</span></div></td>
+        <td data-label="${t("p_category")}">${esc(catName(p))}</td>
+        <td data-label="${t("p_price").replace(" (DH)", "")}" class="r num"><b>${M(p.price)}</b></td>
+        <td data-label="${t("p_cost")}" class="r num">${p.recipe_lines ? M(p.cost) : `<span class="muted">${t("p_no_recipe")}</span>`}</td>
+        <td data-label="${t("p_margin")}" class="r num">${p.recipe_lines ? `<span class="${p.margin >= 60 ? "pos" : p.margin >= 30 ? "" : "neg"}">${p.margin.toFixed(0)}%</span>` : "\u2014"}</td>
+        <td data-label="${t("status")}"><span class="badge ${p.active ? "ok" : "off"}">${p.active ? t("active") : t("inactive")}</span></td>
+        <td class="act"><button class="btn ghost sm" data-e="${p.id}">\u270E ${t("edit")}</button> <button class="btn danger sm" data-d="${p.id}" aria-label="${t("delete")}">\u{1F5D1}</button></td></tr>`).join("")}
+      </tbody></table></div>` : `<div class="card empty">${t("no_data")}</div>`;
+    $$("[data-e]").forEach((b) => b.onclick = () => productForm(rows.find((r) => r.id == b.dataset.e)));
+    $$("[data-d]").forEach((b) => b.onclick = async () => {
+      if (!await confirmBox(t("p_deactivate_q"))) return;
+      try {
+        const r = await api("DELETE", "/api/products/" + b.dataset.d);
+        toast(r.deactivated ? t("deactivated") : t("deleted"));
+        load();
+      } catch (e) {
+        toast(errMsg(e), true);
+      }
+    });
+  };
+  $("#pq").oninput = debounce((e) => {
+    pState.q = e.target.value;
+    load();
+  });
+  $("#pc").onchange = (e) => {
+    pState.cat = e.target.value;
+    load();
+  };
+  await load();
+}
+function productForm(p) {
+  let image = (p == null ? void 0 : p.image) || "";
+  openModal(
+    `<h2>${p ? t("p_edit") : t("p_new")}</h2>
+    <div class="field"><label for="pn">${t("p_name")}</label><input id="pn" class="input" value="${esc((p == null ? void 0 : p.name) || "")}"></div>
+    <div class="row"><div class="field"><label for="pcat">${t("p_category")}</label><select id="pcat" class="select">${S.cats.map((c) => `<option value="${c.id}" ${(p == null ? void 0 : p.category_id) == c.id ? "selected" : ""}>${esc(catName(c))}</option>`).join("")}</select></div>
+    <div class="field"><label for="pp">${t("p_price")}</label><input id="pp" class="input" type="number" min="0" step="0.5" inputmode="decimal" value="${p ? p.price : ""}" dir="ltr"></div></div>
+    <div class="field"><span class="lbl">${t("p_image")}</span><div class="img-pick"><div id="pv">${thumb(image)}</div>
+      <input id="pe" class="input" maxlength="4" placeholder="${t("p_emoji")}" value="${isImg(image) ? "" : esc(image)}" style="max-width:130px">
+      <label class="btn ghost sm" style="cursor:pointer">\u{1F4F7} ${t("p_upload")}<input id="pf" type="file" accept="image/*" hidden></label></div></div>
+    <label class="switch"><input id="pa" type="checkbox" ${!p || p.active ? "checked" : ""}> ${t("active")}</label>
+    ${p ? `<div class="preview-box"><div><small>${t("p_cost")}</small><b>${p.recipe_lines ? M(p.cost) : "\u2014"}</b></div><div><small>${t("p_profit")}</small><b>${p.recipe_lines ? M(p.profit) : "\u2014"}</b></div><div><small>${t("p_margin")}</small><b>${p.recipe_lines ? p.margin.toFixed(0) + "%" : "\u2014"}</b></div></div>` : ""}
+    <div class="hint" style="margin-top:8px">${t("p_recipe_hint")}</div>
+    <div id="fe" class="error-msg hidden" role="alert"></div>
+    <div class="modal-foot"><button class="btn ghost" data-close>${t("cancel")}</button><button class="btn primary" id="fs">${t("save")}</button></div>`,
+    (ov, close) => {
+      const setPv = () => $("#pv", ov).innerHTML = thumb(image);
+      $("#pe", ov).oninput = (e) => {
+        image = e.target.value;
+        setPv();
+      };
+      $("#pf", ov).onchange = async (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        const fd = new FormData();
+        fd.append("file", f);
+        try {
+          const r = await api("POST", "/api/upload", fd);
+          image = r.path;
+          $("#pe", ov).value = "";
+          setPv();
+        } catch (er) {
+          toast(errMsg(er), true);
+        }
+      };
+      $("#fs", ov).onclick = async () => {
+        const body = { name: $("#pn", ov).value, category_id: $("#pcat", ov).value, price: $("#pp", ov).value, image, active: $("#pa", ov).checked ? 1 : 0 };
+        try {
+          p ? await api("PUT", "/api/products/" + p.id, body) : await api("POST", "/api/products", body);
+          close();
+          toast(t("saved"));
+          renderView();
+        } catch (e) {
+          const b = $("#fe", ov);
+          b.textContent = errMsg(e);
+          b.classList.remove("hidden");
+        }
+      };
+    }
+  );
+}
+const iState = { tab: "ing", q: "", mIng: "", mType: "" };
+const UNITS = ["kg", "g", "l", "ml", "piece", "box"];
+async function vInventory(view) {
+  S.suppliers = await api("GET", "/api/suppliers");
+  view.innerHTML = `
+    <div class="page-head"><div><h1>${t("i_title")}</h1><div class="sub" id="isub"></div></div><div id="ihead"></div></div>
+    <div class="tabs" role="tablist"><button class="tab ${iState.tab === "ing" ? "on" : ""}" role="tab" data-t="ing">${t("i_tab_ing")}</button><button class="tab ${iState.tab === "mov" ? "on" : ""}" role="tab" data-t="mov">${t("i_tab_mov")}</button></div>
+    <div id="ibody"></div>`;
+  $$(".tab", view).forEach((b) => b.onclick = () => {
+    iState.tab = b.dataset.t;
+    vInventory(view);
+  });
+  iState.tab === "ing" ? await invIngredients() : await invMovements();
+}
+async function invIngredients() {
+  const rows = await api("GET", "/api/ingredients?q=" + encodeURIComponent(iState.q));
+  const low = rows.filter((r) => r.active && r.low), total = rows.reduce((a, r) => a + r.stock_value, 0);
+  $("#isub").textContent = `${t("i_stock_total")}: ${M(total)}`;
+  $("#ihead").innerHTML = `<div class="toolbar"><input id="iq" class="input grow" type="search" placeholder="${t("search")}" value="${esc(iState.q)}" aria-label="${t("search")}"><button class="btn primary" id="newi">\uFF0B ${t("i_new")}</button></div>`;
+  $("#ibody").innerHTML = `${low.length ? `<div class="alert" role="alert">\u26A0 ${t("i_low")} \u2014 ${t("i_low_n", { n: low.length })}: ${esc(low.map((l) => l.name).join(", "))}</div>` : ""}
+    ${rows.length ? `<div class="table-wrap"><table><thead><tr><th>${t("name")}</th><th class="r">${t("i_qty")}</th><th class="r">${t("i_min")}</th><th class="r">${t("i_cost")}</th><th class="r">${t("i_value")}</th><th>${t("i_supplier")}</th><th>${t("status")}</th><th></th></tr></thead><tbody>
+    ${rows.map((r) => `<tr>
+      <td class="first"><b>${esc(r.name)}</b>${r.active ? "" : ` <span class="badge off">${t("inactive")}</span>`}</td>
+      <td data-label="${t("i_qty")}" class="r num"><span><b>${qty(r.current_quantity)}</b> ${esc(t("unit_" + r.unit))}</span></td>
+      <td data-label="${t("i_min")}" class="r num">${qty(r.min_stock)}</td>
+      <td data-label="${t("i_cost")}" class="r num">${unitCost(r.avg_cost)} ${DH()} / ${esc(r.unit)}</td>
+      <td data-label="${t("i_value")}" class="r num">${M(r.stock_value)}</td>
+      <td data-label="${t("i_supplier")}">${esc(r.supplier || "\u2014")}</td>
+      <td data-label="${t("status")}">${r.low ? `<span class="badge low">\u26A0 ${t("i_low")}</span>` : `<span class="badge ok">${t("i_ok")}</span>`}</td>
+      <td class="act"><button class="btn ghost sm" data-m="${r.id}">\u21C5 ${t("i_adjust")}</button> <button class="btn ghost sm" data-e="${r.id}" aria-label="${t("edit")}">\u270E</button></td></tr>`).join("")}
+    </tbody></table></div>` : `<div class="card empty">${t("no_data")}</div>`}`;
+  $("#newi").onclick = () => ingForm(null);
+  $("#iq").oninput = debounce((e) => {
+    iState.q = e.target.value;
+    invIngredients().then(() => {
+      const i = $("#iq");
+      i.focus();
+      i.setSelectionRange(i.value.length, i.value.length);
+    });
+  });
+  $$("[data-e]").forEach((b) => b.onclick = () => ingForm(rows.find((r) => r.id == b.dataset.e)));
+  $$("[data-m]").forEach((b) => b.onclick = () => moveForm(rows.find((r) => r.id == b.dataset.m)));
+}
+function ingForm(r) {
+  openModal(
+    `<h2>${r ? t("i_edit") : t("i_new")}</h2>
+    <div class="field"><label for="in">${t("name")}</label><input id="in" class="input" value="${esc((r == null ? void 0 : r.name) || "")}"></div>
+    <div class="row"><div class="field"><label for="iu">${t("i_unit")}</label><select id="iu" class="select">${UNITS.map((u) => `<option value="${u}" ${(r == null ? void 0 : r.unit) === u ? "selected" : ""}>${esc(t("unit_" + u))}</option>`).join("")}</select></div>
+      <div class="field"><label for="im">${t("i_min")}</label><input id="im" class="input" type="number" min="0" step="any" value="${r ? r.min_stock : 0}" dir="ltr"></div></div>
+    <div class="row"><div class="field"><label for="ic">${t("i_cost")} (${DH()})</label><input id="ic" class="input" type="number" min="0" step="any" value="${r ? r.avg_cost : 0}" dir="ltr"></div>
+      ${r ? `<div class="field"><span class="lbl">${t("i_current")}</span><div class="input" style="background:#f5eddf">${qty(r.current_quantity)} ${esc(r.unit)}</div></div>` : `<div class="field"><label for="iq0">${t("i_initial")}</label><input id="iq0" class="input" type="number" min="0" step="any" value="0" dir="ltr"></div>`}</div>
+    <div class="field"><label for="is">${t("i_supplier")}</label><select id="is" class="select"><option value="">${t("i_no_supplier")}</option>${S.suppliers.map((s) => `<option value="${s.id}" ${(r == null ? void 0 : r.supplier_id) == s.id ? "selected" : ""}>${esc(s.company_name)}</option>`).join("")}</select></div>
+    ${r ? `<label class="switch"><input id="ia" type="checkbox" ${r.active ? "checked" : ""}> ${t("active")}</label>` : ""}
+    <div class="hint">${t("i_cost_hint")}</div>
+    <div id="fe" class="error-msg hidden" role="alert"></div>
+    <div class="modal-foot"><button class="btn ghost" data-close>${t("cancel")}</button><button class="btn primary" id="fs">${t("save")}</button></div>`,
+    (ov, close) => $("#fs", ov).onclick = async () => {
+      const body = { name: $("#in", ov).value, unit: $("#iu", ov).value, min_stock: $("#im", ov).value, avg_cost: $("#ic", ov).value, supplier_id: $("#is", ov).value || null };
+      if (r) body.active = $("#ia", ov).checked ? 1 : 0;
+      else body.initial_quantity = $("#iq0", ov).value;
+      try {
+        r ? await api("PUT", "/api/ingredients/" + r.id, body) : await api("POST", "/api/ingredients", body);
+        close();
+        toast(t("saved"));
+        renderView();
+      } catch (e) {
+        const b = $("#fe", ov);
+        b.textContent = errMsg(e);
+        b.classList.remove("hidden");
+      }
+    }
+  );
+}
+function moveForm(r) {
+  openModal(
+    `<h2>${t("i_adjust_title")}</h2><div class="muted">${esc(r.name)} \u2014 ${t("i_current")}: <b>${qty(r.current_quantity)} ${esc(r.unit)}</b></div>
+    <div class="field"><label for="mt">${t("i_type")}</label><select id="mt" class="select"><option value="set">${t("i_mode_set")}</option><option value="delta">${t("i_mode_delta")}</option><option value="waste">${t("mv_waste")}</option><option value="return">${t("mv_return")}</option></select></div>
+    <div class="field"><label for="mq" id="mql">${t("i_qty_new")} (${esc(r.unit)})</label><input id="mq" class="input" type="number" step="any" inputmode="decimal" dir="ltr"><div class="hint" id="mh"></div></div>
+    <div class="field"><label for="mn">${t("i_note")}</label><input id="mn" class="input"></div>
+    <div id="fe" class="error-msg hidden" role="alert"></div>
+    <div class="modal-foot"><button class="btn ghost" data-close>${t("cancel")}</button><button class="btn primary" id="fs">${t("save")}</button></div>`,
+    (ov, close) => {
+      const upd = () => {
+        const v = $("#mt", ov).value;
+        $("#mql", ov).textContent = `${v === "set" ? t("i_qty_new") : v === "delta" ? t("i_qty_delta") : t("i_qty")} (${r.unit})`;
+        $("#mh", ov).textContent = v === "waste" ? t("i_waste_hint") : v === "return" ? t("i_return_hint") : "";
+      };
+      $("#mt", ov).onchange = upd;
+      upd();
+      $("#fs", ov).onclick = async () => {
+        const v = $("#mt", ov).value, q = $("#mq", ov).value;
+        if (q === "") {
+          const b = $("#fe", ov);
+          b.textContent = t("i_qty");
+          b.classList.remove("hidden");
+          return;
+        }
+        const body = v === "set" ? { type: "adjustment", mode: "set", quantity: q, note: $("#mn", ov).value } : v === "delta" ? { type: "adjustment", quantity: q, note: $("#mn", ov).value } : { type: v, quantity: Math.abs(q), note: $("#mn", ov).value };
+        try {
+          await api("POST", `/api/ingredients/${r.id}/movement`, body);
+          close();
+          toast(t("saved"));
+          renderView();
+        } catch (e) {
+          const b = $("#fe", ov);
+          b.textContent = errMsg(e);
+          b.classList.remove("hidden");
+        }
+      };
+    }
+  );
+}
+async function invMovements() {
+  const ings = await api("GET", "/api/ingredients");
+  const rows = await api("GET", `/api/stock-movements?limit=150&ingredient=${iState.mIng}&type=${iState.mType}`);
+  $("#isub").textContent = "";
+  $("#ihead").innerHTML = `<div class="toolbar"><select id="fi" class="select" aria-label="${t("i_tab_ing")}"><option value="">${t("i_all_ing")}</option>${ings.map((i) => `<option value="${i.id}" ${iState.mIng == i.id ? "selected" : ""}>${esc(i.name)}</option>`).join("")}</select>
+    <select id="ft" class="select"><option value="">${t("i_all_types")}</option>${["purchase", "sale", "adjustment", "waste", "return"].map((x) => `<option value="${x}" ${iState.mType === x ? "selected" : ""}>${t("mv_" + x)}</option>`).join("")}</select></div>`;
+  $("#ibody").innerHTML = rows.length ? `<div class="table-wrap"><table><thead><tr><th>${t("date")}</th><th>${t("i_tab_ing")}</th><th class="r">${t("i_qty")}</th><th>${t("i_type")}</th><th>${t("user")}</th><th>${t("i_reference")}</th></tr></thead><tbody>
+    ${rows.map((m) => `<tr><td class="first num">${fmtDate(m.created_at)}</td><td data-label="${t("i_tab_ing")}"><b>${esc(m.ingredient)}</b></td>
+      <td data-label="${t("i_qty")}" class="r num"><span><span class="${m.quantity >= 0 ? "pos" : "neg"}" dir="ltr">${m.quantity > 0 ? "+" : ""}${qty(m.quantity)}</span> ${esc(t("unit_" + m.unit))}</span></td>
+      <td data-label="${t("i_type")}"><span class="badge mv-${m.movement_type}">${t("mv_" + m.movement_type)}</span></td>
+      <td data-label="${t("user")}">${esc(m.user || "")}</td><td data-label="${t("i_reference")}" class="num">${esc(m.reference || "")}${m.note ? ` <span class="muted">\xB7 ${esc(m.note)}</span>` : ""}</td></tr>`).join("")}</tbody></table></div>` : `<div class="card empty">${t("no_data")}</div>`;
+  $("#fi").onchange = (e) => {
+    iState.mIng = e.target.value;
+    invMovements();
+  };
+  $("#ft").onchange = (e) => {
+    iState.mType = e.target.value;
+    invMovements();
+  };
+}
+async function vSettings(view) {
+  const s = await api("GET", "/api/settings");
+  let logo = s.logo || "";
+  view.innerHTML = `
+    <div class="page-head"><h1>${t("s_title")}</h1></div>
+    <div class="grid-3" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+      <div class="card"><h3>${t("s_business")}</h3>
+        <div class="field"><label for="sb">${t("s_business_name")}</label><input id="sb" class="input" value="${esc(s.business_name)}"></div>
+        <div class="field"><label for="sc">${t("s_city")}</label><input id="sc" class="input" value="${esc(s.city)}"></div>
+        <div class="field"><span class="lbl">${t("s_currency")}</span><div class="input" style="background:#f5eddf">MAD \u2014 ${esc(s.currency_label)}</div></div>
+        <div class="field"><span class="lbl">${t("s_logo")}</span><div class="img-pick"><div id="lg">${logo ? `<div class="thumb"><img src="${esc(logo)}" alt=""></div>` : `<div class="logo-six">6</div>`}</div><label class="btn ghost sm" style="cursor:pointer">\u{1F4F7} ${t("p_upload")}<input id="sl" type="file" accept="image/*" hidden></label></div></div>
+      </div>
+      <div class="card"><h3>${t("s_app")}</h3>
+        <div class="field"><label for="sg">${t("s_lang")}</label><select id="sg" class="select">${Object.entries(LANGS).map(([k, v]) => `<option value="${k}" ${s.default_language === k ? "selected" : ""}>${esc(v.meta.name)}</option>`).join("")}</select></div>
+        <label class="switch" style="margin-top:12px"><input id="st" type="checkbox" ${s.tax_enabled ? "checked" : ""}> ${t("s_tax")}</label>
+        <div class="field"><label for="sr">${t("s_tax_rate")}</label><input id="sr" class="input" type="number" min="0" max="100" step="0.5" value="${s.tax_rate}" dir="ltr"></div>
+        <label class="switch" style="margin-top:12px"><input id="sn" type="checkbox" ${s.allow_negative_stock ? "checked" : ""}> ${t("s_neg")}</label><div class="hint">${t("s_neg_hint")}</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px"><h3>${t("b_title")}</h3><p class="muted" style="margin-top:-6px">${t("b_hint")}</p>
+      <div class="toolbar"><button class="btn ghost" id="bx">\u2B07 ${t("b_export")}</button><label class="btn ghost" style="cursor:pointer">\u2B06 ${t("b_import")}<input id="bi" type="file" accept="application/json,.json" hidden></label><button class="btn danger" id="br">\u21BA ${t("b_reset")}</button></div></div>
+    <div style="margin-top:18px"><button class="btn primary" id="ss">${t("save")}</button></div>`;
+  $("#bx").onclick = async () => {
+    const d = await api("GET", "/api/backup/export");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(d)], { type: "application/json" }));
+    a.download = "lesix-backup-" + (/* @__PURE__ */ new Date()).toISOString().slice(0, 10) + ".json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2e3);
+  };
+  $("#bi").onchange = async (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    try {
+      await api("POST", "/api/backup/import", JSON.parse(await f.text()));
+      toast(t("b_imported"));
+      setTimeout(() => location.reload(), 700);
+    } catch (er) {
+      toast(er.detail || errMsg(er), true);
+    }
+  };
+  $("#br").onclick = async () => {
+    if (!await confirmBox(t("b_reset_q"))) return;
+    await api("POST", "/api/backup/reset");
+    location.reload();
+  };
+  $("#sl").onchange = async (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const fd = new FormData();
+    fd.append("file", f);
+    try {
+      logo = (await api("POST", "/api/upload", fd)).path;
+      $("#lg").innerHTML = `<div class="thumb"><img src="${esc(logo)}" alt=""></div>`;
+    } catch (er) {
+      toast(errMsg(er), true);
+    }
+  };
+  $("#ss").onclick = async () => {
+    try {
+      S.settings = await api("PUT", "/api/settings", { business_name: $("#sb").value, city: $("#sc").value, default_language: $("#sg").value, tax_enabled: $("#st").checked, tax_rate: $("#sr").value, allow_negative_stock: $("#sn").checked, logo });
+      toast(t("s_saved"));
+      renderShell();
+    } catch (e) {
+      toast(errMsg(e), true);
+    }
+  };
+}
+(async function boot() {
+  setLang(currentLang);
+  await LocalAPI.init();
+  try {
+    const me = await api("GET", "/api/me");
+    S.me = me.user;
+    S.perms = me.permissions;
+    S.settings = me.settings;
+    if (!location.hash) location.hash = "#/" + firstRoute();
+    renderShell();
+  } catch {
+    renderLogin();
+  }
+})();
+</script>
+</body>
+</html>
